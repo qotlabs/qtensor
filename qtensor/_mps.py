@@ -57,7 +57,7 @@ class MPS(object):
     @staticmethod
     def tt_svd(unfolding, info):
         u, s, v = torch.linalg.svd(unfolding, full_matrices=False)
-        s = torch.tensor(s, dtype=info.data_type, device=info.device)
+        s = s * (1.0 + 0.0 * 1j)
         compressive_core_left = torch.tensordot(u, torch.diag(s), dims=([1], [0]))
         compressive_core_right = v
         return compressive_core_left, compressive_core_right
