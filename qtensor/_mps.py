@@ -12,6 +12,7 @@ class MPS(object):
         self.full_tensor = None
 
     def all_zeros_state(self, n):
+        self.tt_cores = []
         self.r = [1]
         self.phys_ind = []
         for i in range(n):

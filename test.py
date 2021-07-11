@@ -43,9 +43,9 @@ print(state.full_tensor)
 print()
 print('Testing of two-qubit gates')
 U1 = torch.tensor([[1, 0, 0, 0],
-                  [-1, 1, 0, 0],
-                  [2, 0, 0, 1],
-                  [3, 0, 1, 0]], dtype=info.data_type, device=info.device)
+                   [0, 1, 0, 0],
+                   [0, 0, 0, 1],
+                   [0, 0, 1, 0]], dtype=info.data_type, device=info.device)
 print(U1)
 state.full_tensor_calculate()
 print(state.r)
@@ -53,13 +53,34 @@ print(state.return_full_tensor())
 U2 = torch.tensor([[0, 1],
                   [1, 0]], dtype=info.data_type, device=info.device)
 print(U2)
-state.one_qubit_gate(U2, 0)
-state.one_qubit_gate(U2, 1)
+# state.one_qubit_gate(U2, 0)
+# state.one_qubit_gate(U2, 1)
+state.two_qubit_gate(U1, 0)
 state.two_qubit_gate(U1, 0)
 state.full_tensor_calculate()
 print(state.return_full_tensor())
 print(state.r)
 print(state.phys_ind)
-state.one_qubit_gate(U2, 1)
-state.two_qubit_gate(U1, 0)
+# state.one_qubit_gate(U2, 1)
+# state.two_qubit_gate(U1, 0)
+# print(state.r)
+
+N = 3
+swap = torch.tensor([[1, 0, 0, 0],
+                     [0, 0, 1, 0],
+                     [0, 1, 0, 0],
+                     [0, 0, 0, 1]], dtype=info.data_type, device=info.device)
+print(swap)
+state.all_zeros_state(N)
+state.one_qubit_gate(U2, 0)
+state.full_tensor_calculate()
+print(state.return_full_tensor())
+print(state.r)
+state.two_qubit_gate(swap, 0)
+state.two_qubit_gate(swap, 1)
+state.two_qubit_gate(swap, 0)
+state.two_qubit_gate(swap, 1)
+state.two_qubit_gate(swap, 0)
+state.full_tensor_calculate()
+print(state.return_full_tensor())
 print(state.r)
