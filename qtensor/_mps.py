@@ -21,11 +21,18 @@ class MPS(object):
             self.phys_ind.append(2)
         self.N = n
 
+    def one_qubit_gate(self, u, n):
+        core = self.tt_cores[n]
+        self.tt_cores[n] = torch.transpose(torch.tensordot(u, core, dims=([1], [1])), 0, 1)
+
     def full_tensor_calculate(self):
         full_tensor = self.tt_cores[0]
         for i in range(1, len(self.tt_cores), 1):
             full_tensor = torch.tensordot(full_tensor, self.tt_cores[i], dims=([-1], [0]))
         self.full_tensor = full_tensor.reshape(self.phys_ind)
+
+    def return_full_tensor(self):
+        return torch.reshape(self.full_tensor, (-1, ))
 
     def tt_decomposition(self, full_tensor):
         self.phys_ind = list(full_tensor.size())
