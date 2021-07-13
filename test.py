@@ -154,6 +154,7 @@ phi.one_qubit_gate(H, 0)
 print(state.scalar_product(phi))
 print(state.get_norm())
 print(state.get_element([0, 0, 0]))
+print(state.scalar_product(state))
 
 print()
 
@@ -179,3 +180,4 @@ print(state.scalar_product(phi))
 print(state.get_norm())
 print(state.get_element([0, 0, 0]))
 print(state.r)
+print(state.scalar_product(state))
