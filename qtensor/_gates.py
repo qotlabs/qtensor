@@ -30,7 +30,7 @@ class Gates(object):
         nx = np.sin(alpha) * np.cos(phi)
         ny = np.sin(alpha) * np.sin(phi)
         nz = np.cos(alpha)
-        return np.cos(theta / 2) * self.I - 1j * np.sin(theta / 2) * (nx * self.X + ny * self.Y + nz * self.Z)
+        return np.cos(theta / 2) * self.I() - 1j * np.sin(theta / 2) * (nx * self.X() + ny * self.Y() + nz * self.Z())
 
     def Rn_random(self):
         alpha = np.pi * np.random.rand()
