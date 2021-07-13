@@ -9,7 +9,6 @@ class MPS(object):
         self.N = None
         self.r = []
         self.phys_ind = []
-        self.full_tensor = None
 
     def all_zeros_state(self, n):
         self.tt_cores = []
@@ -38,14 +37,16 @@ class MPS(object):
         self.tt_cores[n] = torch.reshape(compressive_left, [self.r[n], self.phys_ind[n], self.r[n + 1]])
         self.tt_cores[n + 1] = torch.reshape(compressive_right, [self.r[n + 1], self.phys_ind[n + 1], self.r[n + 2]])
 
-    def full_tensor_calculate(self):
+    def return_full_tensor(self):
         full_tensor = self.tt_cores[0]
         for i in range(1, len(self.tt_cores), 1):
             full_tensor = torch.tensordot(full_tensor, self.tt_cores[i], dims=([-1], [0]))
-        self.full_tensor = full_tensor.reshape(self.phys_ind)
+        full_tensor = full_tensor.reshape(self.phys_ind)
+        return full_tensor
 
-    def return_full_tensor(self):
-        return torch.reshape(self.full_tensor, (-1, ))
+    def return_full_vector(self):
+        full_tensor = self.return_full_tensor()
+        return torch.reshape(full_tensor, (-1, ))
 
     def tt_decomposition(self, full_tensor):
         self.phys_ind = list(full_tensor.size())
@@ -112,4 +113,4 @@ class MPS(object):
         element = matrix_list[0]
         for matrix in matrix_list[1:]:
             element = torch.tensordot(element, matrix, dims=([1], [0]))
-        return element
+        return element[0][0]
