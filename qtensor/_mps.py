@@ -81,3 +81,35 @@ class MPS(object):
         compressive_left = torch.tensordot(u, torch.diag(s), dims=([1], [0]))
         compressive_right = v
         return compressive_left, compressive_right
+
+    def get_norm(self):
+        core_prev = torch.tensordot(self.tt_cores[0], torch.conj(self.tt_cores[0]), dims=([1], [1]))
+        for i in range(1, len(self.tt_cores), 1):
+            core_cur = torch.tensordot(self.tt_cores[i], torch.conj(self.tt_cores[i]), dims=([1], [1]))
+            core_prev = torch.tensordot(core_prev, core_cur, dims=([1, 3], [0, 2]))
+            core_prev = torch.transpose(core_prev, 1, 2)
+        norm_square = core_prev[0][0][0][0]
+        norm = torch.abs(torch.sqrt(norm_square))
+        return norm
+
+    def scalar_product(self, phi):
+        """
+            Calculating <phi|psi>
+        """
+        if len(self.tt_cores) != len(phi.tt_cores):
+            raise RuntimeError('Different size of tensors')
+        else:
+            core_prev = torch.tensordot(self.tt_cores[0], torch.conj(phi.tt_cores[0]), dims=([1], [1]))
+            for i in range(1, len(self.tt_cores), 1):
+                core_cur = torch.tensordot(self.tt_cores[i], torch.conj(phi.tt_cores[i]), dims=([1], [1]))
+                core_prev = torch.tensordot(core_prev, core_cur, dims=([1, 3], [0, 2]))
+                core_prev = torch.transpose(core_prev, 1, 2)
+            scalar_product = core_prev[0][0][0][0]
+            return scalar_product
+
+    def get_element(self, list_of_index):
+        matrix_list = [self.tt_cores[i][:, index, :] for i, index in enumerate(list_of_index)]
+        element = matrix_list[0]
+        for matrix in matrix_list[1:]:
+            element = torch.tensordot(element, matrix, dims=([1], [0]))
+        return element

@@ -1,5 +1,6 @@
 import torch
 from qtensor import MPS, Info
+import copy
 
 N = 2
 info = Info()
@@ -84,3 +85,25 @@ state.two_qubit_gate(swap, 0)
 state.full_tensor_calculate()
 print(state.return_full_tensor())
 print(state.r)
+
+print(state.tt_cores[2].size())
+print(state.get_norm())
+
+A = torch.randn([2, 2, 2, 2, 2], dtype=info.data_type, device=info.device)
+mps = MPS(info)
+mps.tt_decomposition(A)
+print(mps.r)
+print(A.norm())
+print(mps.get_norm())
+
+print()
+print(A[1][0][0][1][1])
+print(mps.tt_cores[0].size(), mps.tt_cores[1].size(), mps.tt_cores[2].size(), mps.tt_cores[3].size(), mps.tt_cores[4].size())
+print(mps.get_element([1, 0, 0, 1, 1]))
+print('Hello', mps.tt_cores[0][:, 0, :].size())
+print()
+
+mps.all_zeros_state(5)
+mps_other = copy.deepcopy(mps)
+mps.one_qubit_gate(U2, 0)
+print(mps.scalar_product(mps_other))
