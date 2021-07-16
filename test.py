@@ -90,20 +90,21 @@ import copy
 # print(state.tt_cores[2].size())
 # print(state.get_norm())
 #
-# A = torch.randn([2, 2, 2, 2, 2], dtype=info.data_type, device=info.device)
-# mps = MPS(info)
-# mps.tt_decomposition(A)
-# print(mps.r)
+info = Info()
+A = torch.randn([2, 2, 2, 2, 2], dtype=info.data_type, device=info.device)
+mps = MPS(info)
+mps.tt_decomposition(A, max_rank=2)
+print(mps.r)
 # print(A.norm())
 # print(mps.get_norm())
-#
-# print()
-# print(A[1][0][0][1][1])
-# print(mps.tt_cores[0].size(), mps.tt_cores[1].size(), mps.tt_cores[2].size(), mps.tt_cores[3].size(),
-# mps.tt_cores[4].size())
-# print(mps.get_element([1, 0, 0, 1, 1]))
-# print('Hello', mps.tt_cores[0][:, 0, :].size())
-# print()
+
+print()
+print(A[1][0][0][1][1])
+print(mps.tt_cores[0].size(), mps.tt_cores[1].size(), mps.tt_cores[2].size(), mps.tt_cores[3].size(),
+      mps.tt_cores[4].size())
+print(mps.get_element([1, 0, 0, 1, 1]))
+print('Hello', mps.tt_cores[0][:, 0, :].size())
+print()
 #
 # mps.all_zeros_state(5)
 # mps_other = copy.deepcopy(mps)
@@ -132,52 +133,52 @@ import copy
 # print(A2.mv(X))
 # print(torch.mv(A2, X))
 
-# Testing State
-print('Testing State')
-N = 3
-info = Info()
-H = (1 / np.sqrt(2)) * torch.tensor([[1, 1],
-                                     [1, -1]], dtype=info.data_type, device=info.device)
-CNOT = torch.tensor([[1, 0, 0, 0],
-                     [0, 1, 0, 0],
-                     [0, 0, 0, 1],
-                     [0, 0, 1, 0]], dtype=info.data_type, device=info.device)
-state = State(Info())
-state.all_zeros_state(N)
-state.one_qubit_gate(H, 0)
-state.two_qubit_gate(CNOT, 0)
-print('Hello')
-print(state.return_full_vector())
-phi = State(Info())
-phi.all_zeros_state(N)
-phi.one_qubit_gate(H, 0)
-print(state.scalar_product(phi))
-print(state.get_norm())
-print(state.get_element([0, 0, 0]))
-print(state.scalar_product(state))
-
-print()
-
-# Testing MPS
-print('Testing MPS')
-N = 3
-info = Info()
-H = (1 / np.sqrt(2)) * torch.tensor([[1, 1],
-                                     [1, -1]], dtype=info.data_type, device=info.device)
-CNOT = torch.tensor([[1, 0, 0, 0],
-                     [0, 1, 0, 0],
-                     [0, 0, 0, 1],
-                     [0, 0, 1, 0]], dtype=info.data_type, device=info.device)
-state = MPS(Info())
-state.all_zeros_state(N)
-state.one_qubit_gate(H, 0)
-state.two_qubit_gate(CNOT, 0)
-print(state.return_full_vector())
-phi = MPS(Info())
-phi.all_zeros_state(N)
-phi.one_qubit_gate(H, 0)
-print(state.scalar_product(phi))
-print(state.get_norm())
-print(state.get_element([0, 0, 0]))
-print(state.r)
-print(state.scalar_product(state))
+# # Testing State
+# print('Testing State')
+# N = 3
+# info = Info()
+# H = (1 / np.sqrt(2)) * torch.tensor([[1, 1],
+#                                      [1, -1]], dtype=info.data_type, device=info.device)
+# CNOT = torch.tensor([[1, 0, 0, 0],
+#                      [0, 1, 0, 0],
+#                      [0, 0, 0, 1],
+#                      [0, 0, 1, 0]], dtype=info.data_type, device=info.device)
+# state = State(Info())
+# state.all_zeros_state(N)
+# state.one_qubit_gate(H, 0)
+# state.two_qubit_gate(CNOT, 0)
+# print('Hello')
+# print(state.return_full_vector())
+# phi = State(Info())
+# phi.all_zeros_state(N)
+# phi.one_qubit_gate(H, 0)
+# print(state.scalar_product(phi))
+# print(state.get_norm())
+# print(state.get_element([0, 0, 0]))
+# print(state.scalar_product(state))
+#
+# print()
+#
+# # Testing MPS
+# print('Testing MPS')
+# N = 3
+# info = Info()
+# H = (1 / np.sqrt(2)) * torch.tensor([[1, 1],
+#                                      [1, -1]], dtype=info.data_type, device=info.device)
+# CNOT = torch.tensor([[1, 0, 0, 0],
+#                      [0, 1, 0, 0],
+#                      [0, 0, 0, 1],
+#                      [0, 0, 1, 0]], dtype=info.data_type, device=info.device)
+# state = MPS(Info())
+# state.all_zeros_state(N)
+# state.one_qubit_gate(H, 0)
+# state.two_qubit_gate(CNOT, 0)
+# print(state.return_full_vector())
+# phi = MPS(Info())
+# phi.all_zeros_state(N)
+# phi.one_qubit_gate(H, 0)
+# print(state.scalar_product(phi))
+# print(state.get_norm())
+# print(state.get_element([0, 0, 0]))
+# print(state.r)
+# print(state.scalar_product(state))

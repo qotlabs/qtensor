@@ -45,3 +45,8 @@ print("""
 info = Info()
 A = torch.randn((3, 3), dtype=info.data_type, device=info.device)
 print(A)
+
+A = torch.tensor([[2, 1],
+                  [3, 4]], dtype=info.data_type, device=info.device)
+A = A[0:1, :]
+print(A)
