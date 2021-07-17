@@ -87,8 +87,9 @@ class MPS(object):
     def get_norm(self):
         core_prev = torch.tensordot(self.tt_cores[0], torch.conj(self.tt_cores[0]), dims=([1], [1]))
         for i in range(1, len(self.tt_cores), 1):
-            core_cur = torch.tensordot(self.tt_cores[i], torch.conj(self.tt_cores[i]), dims=([1], [1]))
-            core_prev = torch.tensordot(core_prev, core_cur, dims=([1, 3], [0, 2]))
+            core_prev = torch.tensordot(core_prev, self.tt_cores[i], dims=([1], [0]))
+            core_prev = torch.tensordot(core_prev, torch.conj(self.tt_cores[i]), dims=([2], [0]))
+            core_prev = torch.einsum('ijklkn', core_prev)
             core_prev = torch.transpose(core_prev, 1, 2)
         norm_square = core_prev[0][0][0][0]
         norm = torch.abs(torch.sqrt(norm_square))
@@ -103,8 +104,9 @@ class MPS(object):
         else:
             core_prev = torch.tensordot(self.tt_cores[0], torch.conj(phi.tt_cores[0]), dims=([1], [1]))
             for i in range(1, len(self.tt_cores), 1):
-                core_cur = torch.tensordot(self.tt_cores[i], torch.conj(phi.tt_cores[i]), dims=([1], [1]))
-                core_prev = torch.tensordot(core_prev, core_cur, dims=([1, 3], [0, 2]))
+                core_prev = torch.tensordot(core_prev, self.tt_cores[i], dims=([1], [0]))
+                core_prev = torch.tensordot(core_prev, torch.conj(phi.tt_cores[i]), dims=([2], [0]))
+                core_prev = torch.einsum('ijklkn', core_prev)
                 core_prev = torch.transpose(core_prev, 1, 2)
             scalar_product = core_prev[0][0][0][0]
             return scalar_product
