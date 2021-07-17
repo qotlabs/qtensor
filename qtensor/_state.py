@@ -39,7 +39,7 @@ class State(object):
             gate = torch.kron(gate, identity_gate)
         self.full_vector = torch.mv(gate, self.full_vector)
 
-    def two_qubit_gate(self, u, n):
+    def two_qubit_gate(self, u, n, max_rank=None):
         identity_gate = torch.tensor([[1, 0], [0, 1]], dtype=self.info.data_type, device=self.info.device)
         if n == 0:
             gate = u
@@ -67,3 +67,11 @@ class State(object):
 
     def get_element(self, list_of_index):
         return self.full_vector.reshape(self.phys_ind)[tuple(list_of_index)]
+
+    def fidelity(self, phi):
+        """
+            Calculating |<phi|psi>|^2
+        """
+        overlap = self.scalar_product(phi)
+        fid = overlap * torch.conj(overlap)
+        return float(fid)

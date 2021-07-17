@@ -117,3 +117,11 @@ class MPS(object):
         for matrix in matrix_list[1:]:
             element = torch.tensordot(element, matrix, dims=([1], [0]))
         return element[0][0]
+
+    def fidelity(self, phi):
+        """
+            Calculating |<phi|psi>|^2
+        """
+        overlap = self.scalar_product(phi)
+        fid = overlap * torch.conj(overlap)
+        return float(fid)
