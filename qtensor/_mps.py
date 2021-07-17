@@ -36,6 +36,10 @@ class MPS(object):
         self.r[n + 1] = compressive_left.size()[1]
         self.tt_cores[n] = torch.reshape(compressive_left, [self.r[n], self.phys_ind[n], self.r[n + 1]])
         self.tt_cores[n + 1] = torch.reshape(compressive_right, [self.r[n + 1], self.phys_ind[n + 1], self.r[n + 2]])
+        self.normalization(n)
+
+    def normalization(self, n):
+        self.tt_cores[n] = self.tt_cores[n] / self.get_norm()
 
     def return_full_tensor(self):
         full_tensor = self.tt_cores[0]

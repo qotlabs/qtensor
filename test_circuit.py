@@ -1,6 +1,6 @@
 from qtensor import Info, State, MPS, Circuit, Gates
 
-N = 10
+N = 15
 D = 10
 
 info = Info()
@@ -14,7 +14,7 @@ print('Norma = ', mps.get_norm())
 gates = Gates(info)
 circuit = Circuit(gates)
 
-circuit.evolution([mps, state], N, D, max_rank=1024)
+circuit.evolution([mps, state], N, D, max_rank=32)
 
 print(mps.return_full_vector())
 print(state.return_full_vector())
