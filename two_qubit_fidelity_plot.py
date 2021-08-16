@@ -13,10 +13,11 @@ fid_mean_result_40 = np.array([fid_result_40[0]] + [np.exp(np.log(fid_result_40[
 fid_mean_result_60 = np.array([fid_result_60[0]] + [np.exp(np.log(fid_result_60[0:d]).mean()) for d in data_x[1:]])
 
 fig, ax = plt.subplots()
-plt.plot(data_x, fid_result_40, lw=1, alpha=1, label=r'$N = 40, \chi = 64$')
-plt.plot(data_x, fid_mean_result_40, '--', lw=3, alpha=1, label=r'$Average, N = 40, \chi = 64$')
-plt.plot(data_x, fid_result_60, lw=1, alpha=1, label=r'$N = 60, \chi = 64$')
-plt.plot(data_x, fid_mean_result_60, '--', lw=3, alpha=1, label=r'$Average, N = 60, \chi = 64$')
+plt.plot(data_x, fid_result_40, lw=1, alpha=1, color='red', label=r'$N = 40, \chi = 64$')
+plt.plot(data_x, fid_mean_result_40, '--', lw=3, alpha=1, color='red', label=r'$\langle f_n \rangle, N = 40, \chi = 64$')
+plt.plot(data_x, fid_result_60, lw=1, alpha=1, color='magenta', label=r'$N = 60, \chi = 64$')
+plt.plot(data_x, fid_mean_result_60, '--', lw=3, alpha=1, color='magenta',
+         label=r'$\langle f_n \rangle, N = 60, \chi = 64$')
 
 plt.legend(loc='upper right')
 ax.minorticks_off()
