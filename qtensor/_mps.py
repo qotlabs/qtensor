@@ -25,7 +25,9 @@ class MPS(object):
         core = self.tt_cores[n]
         self.tt_cores[n] = torch.transpose(torch.tensordot(u, core, dims=([1], [1])), 0, 1)
 
-    def two_qubit_gate(self, u, n, max_rank=None):
+    def two_qubit_gate(self, u, n, max_rank=None, ort=False):
+        if ort:
+            self.sequence_qr(n)
         u = torch.reshape(u, [2, 2, 2, 2])
         phi = torch.tensordot(self.tt_cores[n], self.tt_cores[n + 1], dims=([2], [0]))
         phi = torch.tensordot(u, phi, dims=([2, 3], [1, 2]))
@@ -87,6 +89,113 @@ class MPS(object):
         compressive_left = torch.tensordot(u, torch.diag(s), dims=([1], [0]))
         compressive_right = v
         return compressive_left, compressive_right
+
+    # Mistake!
+    @staticmethod
+    def tt_qr(unfolding, rank=None):
+        print('Unfolding_size QR = ', unfolding.size())
+        q, r = torch.linalg.qr(unfolding)
+        if rank is not None:
+            q = q[:, 0:rank]
+            r = r[0:rank, :]
+        compressive_left = q
+        compressive_right = r
+        # print('Test QR: ', np.sum(np.abs(np.array(unfolding - np.dot(np.array(q, dtype=complex),
+        #                                                              np.array(r, dtype=complex)))) ** 2))
+        return compressive_left, compressive_right
+
+    # Mistake!
+    @staticmethod
+    def tt_lq(unfolding, rank=None):
+        print('Unfolding_size LQ = ', unfolding.size())
+        q, r = torch.linalg.qr(torch.transpose(torch.conj(unfolding), 0, 1))
+        l = torch.transpose(torch.conj(r), 0, 1)
+        q = torch.transpose(torch.conj(q), 0, 1)
+        if rank is not None:
+            l = l[:, 0:rank]
+            q = q[0:rank, :]
+        compressive_left = l
+        compressive_right = q
+        # print('Test LQ: ', np.sum(np.abs(np.array(unfolding - np.dot(np.array(l, dtype=complex),
+        #                                                              np.array(q, dtype=complex)))) ** 2))
+        return compressive_left, compressive_right
+
+    @staticmethod
+    def tt_svd_left(unfolding, rank=None):
+        u, s, v = torch.linalg.svd(unfolding, full_matrices=False)
+        s = s * (1.0 + 0.0 * 1j)
+        q = u
+        r = torch.tensordot(torch.diag(s), v, dims=([1], [0]))
+        if rank is not None:
+            q = q[:, 0:rank]
+            r = r[0:rank, :]
+        compressive_left = q
+        compressive_right = r
+        return compressive_left, compressive_right
+
+    @staticmethod
+    def tt_svd_right(unfolding, rank=None):
+        u, s, v = torch.linalg.svd(torch.transpose(torch.conj(unfolding), 0, 1), full_matrices=False)
+        s = s * (1.0 + 0.0 * 1j)
+        q = u
+        r = torch.tensordot(torch.diag(s), v, dims=([1], [0]))
+        l = torch.transpose(torch.conj(r), 0, 1)
+        q = torch.transpose(torch.conj(q), 0, 1)
+        if rank is not None:
+            l = l[:, 0:rank]
+            q = q[0:rank, :]
+        compressive_left = l
+        compressive_right = q
+        return compressive_left, compressive_right
+
+    def sequence_qr_left(self, n):
+        for i in range(0, n, 1):
+            phi = torch.tensordot(self.tt_cores[i], self.tt_cores[i + 1], dims=([2], [0]))
+            unfolding = torch.reshape(phi, (self.r[i] * self.phys_ind[i], self.phys_ind[i + 1] * self.r[i + 2]))
+            # compressive_left, compressive_right = MPS.tt_qr(unfolding, rank=self.r[i + 1])
+            compressive_left, compressive_right = MPS.tt_svd_left(unfolding, rank=self.r[i + 1])
+            self.tt_cores[i] = torch.reshape(compressive_left, (self.r[i], self.phys_ind[i], self.r[i + 1]))
+            self.tt_cores[i + 1] = torch.reshape(compressive_right, (self.r[i + 1], self.phys_ind[i + 1],
+                                                                     self.r[i + 2]))
+
+    def sequence_qr_right(self, n):
+        for i in range(self.N - 1, n + 1, -1):
+            phi = torch.tensordot(self.tt_cores[i - 1], self.tt_cores[i], dims=([2], [0]))
+            unfolding = torch.reshape(phi, (self.r[i - 1] * self.phys_ind[i - 1], self.phys_ind[i] * self.r[i + 1]))
+            # compressive_left, compressive_right = MPS.tt_lq(unfolding, rank=self.r[i])
+            compressive_left, compressive_right = MPS.tt_svd_right(unfolding, rank=self.r[i])
+            self.tt_cores[i - 1] = torch.reshape(compressive_left, (self.r[i - 1], self.phys_ind[i - 1], self.r[i]))
+            self.tt_cores[i] = torch.reshape(compressive_right, (self.r[i], self.phys_ind[i], self.r[i + 1]))
+
+    def sequence_qr(self, n):
+        if n == 0:
+            self.sequence_qr_right(n)
+            pass
+        elif n == (self.N - 2):
+            self.sequence_qr_left(n)
+        else:
+            self.sequence_qr_left(n)
+            self.sequence_qr_right(n)
+
+    def check_ort_left(self, n):
+        psi = self.tt_cores[n]
+        psi_0 = np.array(psi[:, 0, :])
+        psi_1 = np.array(psi[:, 1, :])
+        matrix = np.dot(psi_0.T.conjugate(), psi_0) + np.dot(psi_1.T.conjugate(), psi_1)
+        if np.sum(np.abs(matrix - np.eye(self.r[n + 1], dtype=complex)) ** 2) < 10 ** (-10):
+            return 1
+        else:
+            return 0
+
+    def check_ort_right(self, n):
+        psi = self.tt_cores[n]
+        psi_0 = np.array(psi[:, 0, :])
+        psi_1 = np.array(psi[:, 1, :])
+        matrix = np.dot(psi_0, psi_0.T.conjugate()) + np.dot(psi_1, psi_1.T.conjugate())
+        if np.sum(np.abs(matrix - np.eye(self.r[n], dtype=complex)) ** 2) < 10 ** (-10):
+            return 1
+        else:
+            return 0
 
     def get_norm(self):
         core_prev = torch.tensordot(self.tt_cores[0], torch.conj(self.tt_cores[0]), dims=([1], [1]))

@@ -39,7 +39,7 @@ class State(object):
             gate = torch.kron(gate, identity_gate)
         self.full_vector = torch.mv(gate, self.full_vector)
 
-    def two_qubit_gate(self, u, n, max_rank=None):
+    def two_qubit_gate(self, u, n, max_rank=None, ort=False):
         identity_gate = torch.tensor([[1, 0], [0, 1]], dtype=self.info.data_type, device=self.info.device)
         if n == 0:
             gate = u
