@@ -1,4 +1,4 @@
-from qtensor import Info, State, MPS, Circuit, Gates, Load
+from qtensor import Info, State, MPS, CircuitCX, Gates, Load
 
 N = 15
 D = 24
@@ -9,7 +9,7 @@ info = Info()
 mps = MPS(info)
 mps.all_zeros_state(N)
 gates = Gates(info)
-circuit = Circuit(gates)
+circuit = CircuitCX(gates)
 
 result_px = []
 
