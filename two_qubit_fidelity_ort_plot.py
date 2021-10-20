@@ -30,9 +30,11 @@ plt.plot(data_x, fid_mean_result_60_ort, '--', lw=3, alpha=1, color='magenta',
 plt.plot(data_x, fid_mean_result_60, '--', lw=3, alpha=0.3, color='magenta',
          label=r'$\langle f_n \rangle, N = 60, \chi = 64$')
 
-plt.legend(loc='upper right')
+plt.tick_params(which='major', direction='in', labelsize=16)
+plt.tick_params(which='minor', direction='in', labelsize=16)
+plt.legend(loc='lower left', fontsize=13)
 ax.minorticks_off()
 plt.xlim(0, 150)
-plt.xlabel(r'$D$', fontsize=15)
-plt.ylabel(r'$f_n$', fontsize=15)
+plt.xlabel(r'$D$', fontsize=20)
+plt.ylabel(r'$\langle f_n \rangle$', fontsize=20)
 plt.show()

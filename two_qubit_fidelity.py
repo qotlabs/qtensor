@@ -1,4 +1,4 @@
-from qtensor import Info, State, MPS, CircuitFid, Gates, Load
+from qtensor import Info, State, MPS, CircuitCXFid, Gates, Load
 
 N = 60
 D = 200
@@ -9,7 +9,7 @@ info = Info()
 mps = MPS(info)
 mps.all_zeros_state(N)
 gates = Gates(info)
-circuit = CircuitFid(gates)
+circuit = CircuitCXFid(gates)
 
 fid_result = []
 

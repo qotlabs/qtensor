@@ -1,4 +1,4 @@
-from qtensor import Info, State, MPS, CircuitFid, CircuitMultiFid, Gates, Load
+from qtensor import Info, State, MPS, CircuitCXFid, CircuitCXMultiFid, Gates, Load
 
 N = 20
 D = 25
@@ -9,7 +9,7 @@ info = Info()
 mps = MPS(info)
 mps.all_zeros_state(N)
 gates = Gates(info)
-circuit = CircuitFid(gates)
+circuit = CircuitCXFid(gates)
 
 fid_result_two = []
 
@@ -28,7 +28,7 @@ mps = MPS(info)
 mps.all_zeros_state(N)
 mps_exact = MPS(info)
 mps_exact.all_zeros_state(N)
-circuit = CircuitMultiFid(gates)
+circuit = CircuitCXMultiFid(gates)
 circuit.evolution(mps, mps_exact, N, D, fid_result_multi, max_rank=max_rank)
 
 print(fid_result_multi)
