@@ -90,21 +90,21 @@ import copy
 # print(state.tt_cores[2].size())
 # print(state.get_norm())
 #
-info = Info()
-A = torch.randn([2, 2, 2, 2, 2], dtype=info.data_type, device=info.device)
-mps = MPS(info)
-mps.tt_decomposition(A, max_rank=2)
-print(mps.r)
-# print(A.norm())
-# print(mps.get_norm())
-
-print()
-print(A[1][0][0][1][1])
-print(mps.tt_cores[0].size(), mps.tt_cores[1].size(), mps.tt_cores[2].size(), mps.tt_cores[3].size(),
-      mps.tt_cores[4].size())
-print(mps.get_element([1, 0, 0, 1, 1]))
-print('Hello', mps.tt_cores[0][:, 0, :].size())
-print()
+# info = Info()
+# A = torch.randn([2, 2, 2, 2, 2], dtype=info.data_type, device=info.device)
+# mps = MPS(info)
+# mps.tt_decomposition(A, max_rank=2)
+# print(mps.r)
+# # print(A.norm())
+# # print(mps.get_norm())
+#
+# print()
+# print(A[1][0][0][1][1])
+# print(mps.tt_cores[0].size(), mps.tt_cores[1].size(), mps.tt_cores[2].size(), mps.tt_cores[3].size(),
+#       mps.tt_cores[4].size())
+# print(mps.get_element([1, 0, 0, 1, 1]))
+# print('Hello', mps.tt_cores[0][:, 0, :].size())
+# print()
 #
 # mps.all_zeros_state(5)
 # mps_other = copy.deepcopy(mps)
@@ -182,3 +182,24 @@ print()
 # print(state.get_element([0, 0, 0]))
 # print(state.r)
 # print(state.scalar_product(state))
+
+import numpy as np
+from qtensor import IsingHam
+from qtensor import Info, MPS, Gates, CircuitCZ
+from qtensor import Load
+import matplotlib.pyplot as plt
+import time
+
+N = 20
+D = 13
+
+info = Info()
+mps = MPS(info)
+mps.all_zeros_state(N)
+
+gates = Gates(info)
+circuit = CircuitCZ(gates)
+
+fid_result = []
+
+circuit.evolution([mps], N, D, max_rank=None, ort=False)

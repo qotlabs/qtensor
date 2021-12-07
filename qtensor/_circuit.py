@@ -32,7 +32,9 @@ class CircuitCZ(object):
 
     def evolution(self, states_list, N, D, max_rank=None, ort=False):
         parity = False
+        print(states_list[0].r)
         for d in range(D):
+            print('d = ', d + 1)
             for i in range(N):
                 Rn = self.gates.Rn_random()
                 for state in states_list:
@@ -42,11 +44,13 @@ class CircuitCZ(object):
                     for state in states_list:
                         state.two_qubit_gate(self.gates.CZ(), i, max_rank, ort)
                 parity = True
+                print(states_list[0].r)
             else:
                 for i in range(1, N - 1, 2):
                     for state in states_list:
                         state.two_qubit_gate(self.gates.CZ(), i, max_rank, ort)
                 parity = False
+                print(states_list[0].r)
 
 
 class CircuitCXError(object):
@@ -64,12 +68,18 @@ class CircuitCXError(object):
             if not parity:
                 for i in range(0, N - 1, 2):
                     for j, state in enumerate(states_list):
-                        state.two_qubit_gate(self.gates.CX(), i, max_rank_list[j], ort)
+                        if j >= len(states_list) / 2:
+                            state.two_qubit_gate(self.gates.CX(), i, max_rank_list[j], ort=True)
+                        else:
+                            state.two_qubit_gate(self.gates.CX(), i, max_rank_list[j], ort=False)
                 parity = True
             else:
                 for i in range(1, N - 1, 2):
                     for j, state in enumerate(states_list):
-                        state.two_qubit_gate(self.gates.CX(), i, max_rank_list[j], ort)
+                        if j >= len(states_list) / 2:
+                            state.two_qubit_gate(self.gates.CX(), i, max_rank_list[j], ort=True)
+                        else:
+                            state.two_qubit_gate(self.gates.CX(), i, max_rank_list[j], ort=False)
                 parity = False
             print(states_list[-1].r)
 

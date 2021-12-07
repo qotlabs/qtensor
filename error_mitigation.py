@@ -5,9 +5,12 @@ from qtensor import Load
 import matplotlib.pyplot as plt
 import time
 
-N = 200
+N = 50
 D = 5
-list_max_rank = list(map(int, 2 ** np.linspace(0, 5, 6)))
+# list_max_rank = list(map(int, 2 ** np.linspace(0, 5, 6)))
+list_max_rank = list(map(int, np.linspace(1, 16, 16)))
+list_max_rank.append(None)
+list_max_rank += list(map(int, np.linspace(1, 16, 16)))
 list_max_rank.append(None)
 print(list_max_rank)
 
@@ -41,5 +44,5 @@ plt.show()
 
 load = Load('Results.xlsx')
 sheet_name = 'Error_mitigation'
-load.write_data(sheet_name, 'Q', 1, 7, list_max_rank)
-load.write_data(sheet_name, 'R', 1, 7, list_mean_ham)
+load.write_data(sheet_name, 'S', 1, 34, list_max_rank)
+load.write_data(sheet_name, 'T', 1, 34, list_mean_ham)
