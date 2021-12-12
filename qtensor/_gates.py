@@ -26,6 +26,30 @@ class Gates(object):
         return (1 / np.sqrt(2)) * torch.tensor([[1, 1],
                                                 [1, -1]], dtype=self.info.data_type, device=self.info.device)
 
+    def GPhase(self, alpha):
+        return np.exp(1j * alpha) * self.I()
+
+    def GPhase_der(self, alpha):
+        return 1j * np.exp(1j * alpha) * self.I()
+
+    def Rx(self, theta):
+        return np.cos(theta / 2) * self.I() - 1j * np.sin(theta / 2) * self.X()
+
+    def Rx_der(self, theta):
+        return -0.5 * np.sin(theta / 2) * self.I() - 1j * 0.5 * np.cos(theta / 2) * self.X()
+
+    def Ry(self, theta):
+        return np.cos(theta / 2) * self.I() - 1j * np.sin(theta / 2) * self.Y()
+
+    def Ry_der(self, theta):
+        return -0.5 * np.sin(theta / 2) * self.I() - 1j * 0.5 * np.cos(theta / 2) * self.Y()
+
+    def Rz(self, theta):
+        return np.cos(theta / 2) * self.I() - 1j * np.sin(theta / 2) * self.Z()
+
+    def Rz_der(self, theta):
+        return -0.5 * np.sin(theta / 2) * self.I() - 1j * 0.5 * np.cos(theta / 2) * self.Z()
+
     def Rn(self, alpha, phi, theta):
         nx = np.sin(alpha) * np.cos(phi)
         ny = np.sin(alpha) * np.sin(phi)
