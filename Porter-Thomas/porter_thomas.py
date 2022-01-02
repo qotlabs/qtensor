@@ -27,6 +27,6 @@ for i in range(M):
 
 print(result_px)
 
-load = Load('Results.xlsx')
+load = Load('../Results.xlsx')
 sheet_name = 'Porter_Thomas'
 load.write_data(sheet_name, 'C', 4001, 4000 + M, result_px)

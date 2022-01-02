@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from qtensor import Load
 
-load = Load('Results.xlsx')
+load = Load('../Results.xlsx')
 sheet_name = 'Two_qubit_fidelity'
 fid_result_40 = load.read_data(sheet_name, 'A', 1, 200)
 fid_result_60 = load.read_data(sheet_name, 'B', 1, 200)

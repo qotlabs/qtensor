@@ -1,19 +1,15 @@
 import numpy as np
 from qtensor import VQEOptimizer, VQECircuitCXError
-from qtensor import Info, Gates, IsingHam, MPS, Load
+from qtensor import Info, Gates, IsingHam, MPS
 
-N = 50
-D = 1
+N = 5
+D = 4
 
 info = Info()
 gates = Gates(info)
 ham = IsingHam(N, gates, info)
 
-# print('Min energy = ', ham.get_min_energy())
-
-# load = Load('Results.xlsx')
-# sheet_name = 'VQE'
-# load.write_data(sheet_name, 'F', 22, 22, [ham.get_min_energy()])
+print('Min energy = ', ham.get_min_energy())
 
 vqe_circuit = VQECircuitCXError(gates)
 
@@ -24,7 +20,7 @@ number_of_iterations = 20
 list_of_parameters = 2 * np.pi * np.random.rand(4 * N * D)
 
 result = vqe_optimizer.optimize(list_of_parameters, number_of_iterations)
+# result = vqe_optimizer.global_optimize(list_of_parameters)
+# result = vqe_optimizer.cobyla_optimize(list_of_parameters, number_of_iterations)
 
-load = Load('Results.xlsx')
-sheet_name = 'VQE'
-load.write_data(sheet_name, 'J', 1, 20, result)
+print(result)

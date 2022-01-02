@@ -4,7 +4,7 @@ from qtensor import Load
 
 N = 15
 
-load = Load('Results.xlsx')
+load = Load('../Results.xlsx')
 sheet_name = 'Porter_Thomas'
 result_px_2 = load.read_data(sheet_name, 'A', 1, 5000)
 result_px_8 = load.read_data(sheet_name, 'B', 1, 5000)

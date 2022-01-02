@@ -31,7 +31,7 @@ from qtensor import Load
 # plt.ylabel(r'$E$', fontsize=15)
 # plt.show()
 
-load = Load('Results.xlsx')
+load = Load('../Results.xlsx')
 sheet_name = 'VQE'
 
 data_x = np.array(range(0, 20, 1))

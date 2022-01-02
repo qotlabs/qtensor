@@ -194,10 +194,8 @@ class MPS(object):
             core_prev = torch.tensordot(core_prev, torch.conj(self.tt_cores[i]), dims=([2], [0]))
             core_prev = torch.einsum('ijklkn', core_prev)
             core_prev = torch.transpose(core_prev, 1, 2)
-        print('core_prev = ', core_prev.size())
         core_curr = torch.tensordot(core_prev, self.tt_cores[n], dims=([1], [0]))
         core_curr = torch.tensordot(core_curr, torch.conj(self.tt_cores[n]), dims=([2], [0]))
-        print('core_curr = ', core_curr.size())
         if n + 1 < len(self.tt_cores):
             core_next = torch.tensordot(self.tt_cores[n + 1], torch.conj(self.tt_cores[n + 1]), dims=([1], [1]))
             for i in range(n + 2, len(self.tt_cores), 1):
@@ -207,8 +205,6 @@ class MPS(object):
                 core_next = torch.transpose(core_next, 1, 2)
         else:
             core_next = torch.ones([1, 1, 1, 1], dtype=self.info.data_type, device=self.info.device)
-        print('core_next = ', core_next.size())
         core_finish = torch.tensordot(core_curr, core_next, dims=([3, 5], [0, 2]))
-        print('core_finish = ', core_finish.size())
         density_matrix = core_finish[0, 0, :, :, 0, 0]
         return density_matrix

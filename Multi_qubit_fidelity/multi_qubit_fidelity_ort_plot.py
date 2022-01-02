@@ -4,7 +4,7 @@ from qtensor import Load
 
 N = 20
 
-load = Load('Results.xlsx')
+load = Load('../Results.xlsx')
 sheet_name = 'Multi_qubit_fidelity_ort'
 fid_result_two_10_ort = load.read_data(sheet_name, 'A', 1, 40)
 fid_result_multi_10_ort = load.read_data(sheet_name, 'B', 1, 40)

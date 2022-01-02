@@ -42,7 +42,7 @@ plt.scatter(list_max_rank, list_mean_ham)
 plt.xscale('log')
 plt.show()
 
-load = Load('Results.xlsx')
+load = Load('../Results.xlsx')
 sheet_name = 'Error_mitigation'
 load.write_data(sheet_name, 'S', 1, 34, list_max_rank)
 load.write_data(sheet_name, 'T', 1, 34, list_mean_ham)

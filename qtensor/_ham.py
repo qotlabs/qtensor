@@ -23,7 +23,7 @@ class IsingHam(object):
         for i in range(0, self.N, 1):
             psi_tmp = copy.deepcopy(psi)
             psi_tmp.one_qubit_gate(self.gates.X(), i)
-            mean += (- psi_tmp.scalar_product(psi).real)
+            mean += (-psi_tmp.scalar_product(psi).real)
         return float(mean)
 
     def grad_mean_ham(self, psi, grad_psi):
@@ -41,7 +41,7 @@ class IsingHam(object):
         for i in range(0, self.N, 1):
             psi_tmp = copy.deepcopy(grad_psi)
             psi_tmp.one_qubit_gate(self.gates.X(), i)
-            mean += (- psi_tmp.scalar_product(psi).real)
+            mean += (-psi_tmp.scalar_product(psi).real)
         return 2 * float(mean).real
 
     def list_mean_ham(self, list_psi):

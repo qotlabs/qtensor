@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from qtensor import Load
 
-load = Load('Results.xlsx')
+load = Load('../Results.xlsx')
 sheet_name = 'Error_mitigation'
 
 # rank_D_10 = load.read_data(sheet_name, 'A', 1, 11)
