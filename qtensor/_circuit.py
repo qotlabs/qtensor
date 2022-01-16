@@ -26,6 +26,27 @@ class CircuitCX(object):
                 parity = False
 
 
+class CircuitCXRanking(object):
+    def __init__(self, gates):
+        self.gates = gates
+
+    def evolution(self, one_qubit_gates, state, N, D, max_rank=None, ort=False):
+        index = 0
+        parity = False
+        for d in range(D):
+            for i in range(N):
+                state.one_qubit_gate(one_qubit_gates[index], i)
+                index += 1
+            if not parity:
+                for i in range(0, N - 1, 2):
+                    state.two_qubit_gate(self.gates.CX(), i, max_rank, ort)
+                parity = True
+            else:
+                for i in range(1, N - 1, 2):
+                    state.two_qubit_gate(self.gates.CX(), i, max_rank, ort)
+                parity = False
+
+
 class CircuitCZ(object):
     def __init__(self, gates):
         self.gates = gates

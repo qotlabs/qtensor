@@ -2,7 +2,7 @@ import openpyxl
 import numpy as np
 
 
-class Load(object):
+class Loader(object):
     def __init__(self, file_name):
         self.file_name = file_name
 
