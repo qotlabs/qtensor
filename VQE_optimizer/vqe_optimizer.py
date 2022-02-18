@@ -1,9 +1,9 @@
 import numpy as np
 from qtensor import VQEOptimizer, VQECircuitCXError
-from qtensor import Info, Gates, IsingHam, MPS, Load
+from qtensor import Info, Gates, IsingHam, MPS, Loader
 
-N = 50
-D = 1
+N = 10
+D = 10
 
 info = Info()
 gates = Gates(info)
@@ -25,6 +25,6 @@ list_of_parameters = 2 * np.pi * np.random.rand(4 * N * D)
 
 result = vqe_optimizer.optimize(list_of_parameters, number_of_iterations)
 
-load = Load('../Results.xlsx')
+loader = Loader('../Results.xlsx')
 sheet_name = 'VQE'
-load.write_data(sheet_name, 'J', 1, 20, result)
+loader.write_data(sheet_name, 'J', 1, 20, result)
