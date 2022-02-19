@@ -1,8 +1,8 @@
 import numpy as np
-from qtensor import VQEOptimizer, VQECircuitCXError
-from qtensor import Info, Gates, IsingHam, MPS, IsingHamAnalytical
+from qtensor import VQEOptimizer, VQECircuitCX
+from qtensor import Info, Gates, IsingHam, MPS, MPSGrad, IsingHamAnalytical
 
-N = 50
+N = 20
 D = 2
 
 info = Info()
@@ -13,11 +13,11 @@ ham = IsingHamAnalytical(N, gates, info)
 # print('Min energy = ', ham.get_min_energy())
 # print(ham.get_min_energy_analytical())
 
-vqe_circuit = VQECircuitCXError(gates)
+vqe_circuit = VQECircuitCX(gates)
 
-vqe_optimizer = VQEOptimizer(MPS, info, N, D, ham, gates, vqe_circuit, max_rank=None)
+vqe_optimizer = VQEOptimizer(MPS, MPSGrad, info, N, D, ham, gates, vqe_circuit, max_rank=None)
 
-number_of_iterations = 20
+number_of_iterations = 50
 
 list_of_parameters = 2 * np.pi * np.random.rand(4 * N * D)
 

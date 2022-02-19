@@ -1,6 +1,6 @@
 import numpy as np
 import copy
-from qtensor import Info, MPS, IsingHam, VQECircuitCXError, Gates
+from qtensor import Info, MPS, IsingHam, VQECircuitCX, Gates
 
 # N = 10
 # D = 5
@@ -31,7 +31,7 @@ mps_0 = MPS(info)
 mps_0.all_zeros_state(N)
 
 gates = Gates(info)
-vqe_circuit = VQECircuitCXError(gates)
+vqe_circuit = VQECircuitCX(gates)
 
 list_of_parameters = 2 * np.pi * np.random.rand(4 * N * D)
 

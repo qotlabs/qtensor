@@ -3,11 +3,11 @@ import numpy as np
 import torch
 
 
-class VQECircuitCXError(object):
+class VQECircuitCX(object):
     def __init__(self, gates):
         self.gates = gates
 
-    def evolution(self, list_of_parameters, states_list, N, D, max_rank_list, ort=False):
+    def evolution(self, list_of_parameters, state, N, D, max_rank=None, ort=False):
         index_of_parameter = 0
         parity = False
         for d in range(D):
@@ -21,24 +21,21 @@ class VQECircuitCXError(object):
                 Rx_4 = self.gates.Rx(list_of_parameters[index_of_parameter])
                 index_of_parameter += 1
 
-                for state in states_list:
-                    state.one_qubit_gate(GPhase_1, i)
-                    state.one_qubit_gate(Rx_2, i)
-                    state.one_qubit_gate(Ry_3, i)
-                    state.one_qubit_gate(Rx_4, i)
+                state.one_qubit_gate(GPhase_1, i)
+                state.one_qubit_gate(Rx_2, i)
+                state.one_qubit_gate(Ry_3, i)
+                state.one_qubit_gate(Rx_4, i)
 
             if not parity:
                 for i in range(0, N - 1, 2):
-                    for j, state in enumerate(states_list):
-                        state.two_qubit_gate(self.gates.CX(), i, max_rank_list[j], ort)
+                    state.two_qubit_gate(self.gates.CX(), i, max_rank, ort)
                 parity = True
             else:
                 for i in range(1, N - 1, 2):
-                    for j, state in enumerate(states_list):
-                        state.two_qubit_gate(self.gates.CX(), i, max_rank_list[j], ort)
+                    state.two_qubit_gate(self.gates.CX(), i, max_rank, ort)
                 parity = False
 
-    def gradient_evolution(self, index_grad, list_of_parameters, states_list, N, D, max_rank_list, ort=False):
+    def gradient_evolution(self, index_grad, list_of_parameters, state, N, D, max_rank, ort=False):
         index_of_parameter = 0
         parity = False
         for d in range(D):
@@ -67,19 +64,16 @@ class VQECircuitCXError(object):
                     Rx_4 = self.gates.Rx(list_of_parameters[index_of_parameter])
                 index_of_parameter += 1
 
-                for state in states_list:
-                    state.one_qubit_gate(GPhase_1, i)
-                    state.one_qubit_gate(Rx_2, i)
-                    state.one_qubit_gate(Ry_3, i)
-                    state.one_qubit_gate(Rx_4, i)
+                state.one_qubit_gate(GPhase_1, i)
+                state.one_qubit_gate(Rx_2, i)
+                state.one_qubit_gate(Ry_3, i)
+                state.one_qubit_gate(Rx_4, i)
 
             if not parity:
                 for i in range(0, N - 1, 2):
-                    for j, state in enumerate(states_list):
-                        state.two_qubit_gate(self.gates.CX(), i, max_rank_list[j], ort)
+                    state.two_qubit_gate(self.gates.CX(), i, max_rank, ort)
                 parity = True
             else:
                 for i in range(1, N - 1, 2):
-                    for j, state in enumerate(states_list):
-                        state.two_qubit_gate(self.gates.CX(), i, max_rank_list[j], ort)
+                    state.two_qubit_gate(self.gates.CX(), i, max_rank, ort)
                 parity = False

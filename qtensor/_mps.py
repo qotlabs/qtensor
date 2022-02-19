@@ -209,3 +209,22 @@ class MPS(object):
         core_finish = torch.tensordot(core_curr, core_next, dims=([3, 5], [0, 2]))
         density_matrix = core_finish[0, 0, :, :, 0, 0]
         return density_matrix
+
+
+class MPSGrad(MPS):
+    def __init__(self, info):
+        super().__init__(info)
+
+    def two_qubit_gate(self, u, n, max_rank=None, ort=False):
+        if ort:
+            self.sequence_qr(n)
+        u = torch.reshape(u, [2, 2, 2, 2])
+        phi = torch.tensordot(self.tt_cores[n], self.tt_cores[n + 1], dims=([2], [0]))
+        phi = torch.tensordot(u, phi, dims=([2, 3], [1, 2]))
+        phi = torch.transpose(phi, 0, 2)
+        phi = torch.transpose(phi, 1, 2)
+        unfolding = phi.reshape([self.r[n] * self.phys_ind[n], self.r[n + 2] * self.phys_ind[n + 1]])
+        compressive_left, compressive_right = MPS.tt_svd(unfolding, max_rank)
+        self.r[n + 1] = compressive_left.size()[1]
+        self.tt_cores[n] = torch.reshape(compressive_left, [self.r[n], self.phys_ind[n], self.r[n + 1]])
+        self.tt_cores[n + 1] = torch.reshape(compressive_right, [self.r[n + 1], self.phys_ind[n + 1], self.r[n + 2]])

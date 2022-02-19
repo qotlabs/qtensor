@@ -1,5 +1,5 @@
 import numpy as np
-from qtensor import VQEOptimizer, VQECircuitCXError
+from qtensor import VQEOptimizer, VQECircuitCX
 from qtensor import Info, Gates, IsingHam, MPS, Loader
 
 N = 10
@@ -15,7 +15,7 @@ ham = IsingHam(N, gates, info)
 # sheet_name = 'VQE'
 # load.write_data(sheet_name, 'F', 22, 22, [ham.get_min_energy()])
 
-vqe_circuit = VQECircuitCXError(gates)
+vqe_circuit = VQECircuitCX(gates)
 
 vqe_optimizer = VQEOptimizer(MPS, info, N, D, ham, gates, vqe_circuit, max_rank=None)
 
