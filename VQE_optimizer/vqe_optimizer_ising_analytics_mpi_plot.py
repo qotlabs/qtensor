@@ -8,9 +8,9 @@ sheet_name = 'VQE_Ising_Analytical'
 number_of_iterations = 50
 
 data_x = np.array(range(0, number_of_iterations, 1))
-data_N = np.array(range(1, 51, 1))
+data_N = np.array(range(1, 21, 1))
 data_theory_energy = -data_N / 2
-data_energy = loader.read_data(sheet_name, 'A', 1, 2500)
+data_energy = loader.read_data(sheet_name, 'D', 1, 1000)
 data_energy_matrix = data_energy.reshape((len(data_N), number_of_iterations))
 print(data_energy_matrix.shape)
 
