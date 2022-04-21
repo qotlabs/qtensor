@@ -1,27 +1,28 @@
 import numpy as np
-from qtensor import MitigationCircuitCX, MitigationTestCircuitCX, MitigationOptimizer
+from qtensor import MitigationCircuitCX, MitigationOptimizer
 from qtensor import Info, Gates, MPS
 
 N = 10
-D = 5
+D = 10
 
 info = Info()
 gates = Gates(info)
 
-mitigation_circuit = MitigationTestCircuitCX(gates)
+mitigation_circuit = MitigationCircuitCX(info, gates)
 
-mitigation_optimizer = MitigationOptimizer(MPS, info, N, D, gates, mitigation_circuit, max_rank=1, ort=False)
+# number_of_iterations = 10
 
-number_of_iterations = 10
+# list_of_parameters_fix = 2 * np.pi * np.random.rand(4 * N * D)
+# list_of_parameters = 0.0 * 2 * np.pi * np.random.rand(4 * N)
 
-list_of_parameters_fix = 2 * np.pi * np.random.rand(4 * N * D)
-list_of_parameters = 0.0 * 2 * np.pi * np.random.rand(4 * N)
+# state = MPS(info)
+# state.all_zeros_state(N)
+# mitigation_circuit.evolution(list_of_parameters_fix, state, N, D, max_rank=2, ort=True)
 
-mitigation_optimizer.set_parameters_circuit(list_of_parameters_fix)
-mitigation_optimizer.calculate_state_exact()
-
-result = mitigation_optimizer.optimize(list_of_parameters, number_of_iterations)
-
-print(mitigation_optimizer.infidelity_truncation)
-
-print(result)
+results = []
+for k in range(50):
+    state = MPS(info)
+    state.all_zeros_state(N)
+    list_of_parameters_fix = 2 * np.pi * np.random.rand(4 * N * D)
+    results.append(mitigation_circuit.evolution(list_of_parameters_fix, state, N, D, max_rank=2, ort=True))
+print(results)
