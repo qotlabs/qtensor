@@ -12,4 +12,5 @@ from qtensor._ham import IsingHam, IsingHamAnalytical
 from qtensor._vqe_circuit import VQECircuitCX
 from qtensor._vqe_optimizer import VQEOptimizer
 from qtensor._fidelity import fidelity, purity
-from qtensor._mitigation_circuit import MitigationCircuitCX
+from qtensor._mitigation_circuit import MitigationStartCircuitCX, MitigationFinishCircuitCX, \
+    MitigationAllOneLayerCircuitCX, MitigationAllTwoLayerCircuitCX, MitigationFullCircuitCX, MitigationWithoutCircuitCX
