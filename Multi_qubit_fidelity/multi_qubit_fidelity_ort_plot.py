@@ -1,10 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from qtensor import Load
+from qtensor import Loader
 
 N = 20
 
-load = Load('../Results.xlsx')
+load = Loader('../Results.xlsx')
 sheet_name = 'Multi_qubit_fidelity_ort'
 fid_result_two_10_ort = load.read_data(sheet_name, 'A', 1, 40)
 fid_result_multi_10_ort = load.read_data(sheet_name, 'B', 1, 40)
@@ -40,27 +40,27 @@ fid_multi_two_20 = np.array([fid_mean_result_two_20[d] ** ((N - 1) * d / 2) for 
 fid_multi_two_50_ort = np.array([fid_mean_result_two_50_ort[d] ** ((N - 1) * d / 2) for d in data_x])
 fid_multi_two_50 = np.array([fid_mean_result_two_50[d] ** ((N - 1) * d / 2) for d in data_x])
 
-fig, ax = plt.subplots()
-plt.plot(data_x, fid_result_multi_10_ort, lw=3, alpha=1, color='red', label=r'$N = 20, \chi = 10$' + ' ort')
-plt.scatter(data_x, fid_multi_two_10_ort, lw=0.5, alpha=0.5, color='red')
-# plt.plot(data_x, fid_result_multi_10, lw=3, alpha=0.5, color='red', label=r'$N = 20, \chi = 10$')
+fig, ax = plt.subplots(figsize=(9, 5.7))
+plt.plot(data_x, fid_result_multi_10_ort, '--', lw=5, alpha=1, color='gray', label=r'$N = 20, \chi = 10$' + ' ort')
+# plt.scatter(data_x, fid_multi_two_10_ort, lw=0.5, alpha=0.5, color='red')
+# plt.plot(data_x, fid_result_multi_10, '--', lw=5, alpha=1, color='gray', label=r'$N = 20, \chi = 10$')
 # plt.scatter(data_x, fid_multi_two_10, alpha=0.5, color='red')
-plt.plot(data_x, fid_result_multi_20_ort, lw=3, alpha=1, color='blue', label=r'$N = 20, \chi = 20$' + ' ort')
-plt.scatter(data_x, fid_multi_two_20_ort, lw=0.5, alpha=0.5, color='blue')
-# plt.plot(data_x, fid_result_multi_20, lw=3, alpha=0.5, color='blue', label=r'$N = 20, \chi = 20$')
+plt.plot(data_x, fid_result_multi_20_ort, '--', lw=5, alpha=1, color='blue', label=r'$N = 20, \chi = 20$' + ' ort')
+# plt.scatter(data_x, fid_multi_two_20_ort, lw=0.5, alpha=0.5, color='blue')
+# plt.plot(data_x, fid_result_multi_20, '--', lw=5, alpha=1, color='blue', label=r'$N = 20, \chi = 20$')
 # plt.scatter(data_x, fid_multi_two_20, alpha=0.5, color='blue')
-plt.plot(data_x, fid_result_multi_50_ort, lw=3, alpha=1, color='green', label=r'$N = 20, \chi = 50$' + ' ort')
-plt.scatter(data_x, fid_multi_two_50_ort, lw=0.5, alpha=0.5, color='green')
-# plt.plot(data_x, fid_result_multi_50, lw=3, alpha=0.5, color='green', label=r'$N = 20, \chi = 50$')
+plt.plot(data_x, fid_result_multi_50_ort, '--', lw=5, alpha=1, color='red', label=r'$N = 20, \chi = 50$' + ' ort')
+# plt.scatter(data_x, fid_multi_two_50_ort, lw=0.5, alpha=0.5, color='green')
+# plt.plot(data_x, fid_result_multi_50, '--', lw=5, alpha=1, color='red', label=r'$N = 20, \chi = 50$')
 # plt.scatter(data_x, fid_multi_two_50, alpha=0.5, color='green')
 
-plt.legend(loc='lower left', fontsize=13)
+plt.legend(loc='lower left', fontsize=22)
 ax.minorticks_off()
-plt.xlim(0, 30)
-plt.ylim(10 ** (-4), 1.0)
+plt.xlim(0, 20)
+plt.ylim(10 ** (-3), 1.0)
 plt.yscale('log')
-plt.tick_params(which='major', direction='in', labelsize=16)
-plt.tick_params(which='minor', direction='in', labelsize=16)
-plt.xlabel(r'$D$', fontsize=20)
-plt.ylabel(r'$F$', fontsize=20)
+plt.tick_params(which='major', direction='in', labelsize=22)
+plt.tick_params(which='minor', direction='in', labelsize=22)
+plt.xlabel(r'$D$', fontsize=22)
+plt.ylabel(r'$F$', fontsize=22)
 plt.show()

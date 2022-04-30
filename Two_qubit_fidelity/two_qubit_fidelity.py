@@ -1,4 +1,4 @@
-from qtensor import Info, State, MPS, CircuitCXFid, Gates, Load
+from qtensor import Info, State, MPS, CircuitCXFid, Gates, Loader
 
 N = 60
 D = 200
@@ -18,6 +18,6 @@ circuit.evolution(mps, N, D, fid_result, max_rank)
 print(fid_result)
 print(len(fid_result))
 
-load = Load('../Results.xlsx')
+load = Loader('../Results.xlsx')
 sheet_name = 'Two_qubit_fidelity'
 load.write_data(sheet_name, 'B', 1, 200, fid_result)

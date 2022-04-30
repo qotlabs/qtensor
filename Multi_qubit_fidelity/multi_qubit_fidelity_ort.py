@@ -1,4 +1,4 @@
-from qtensor import Info, State, MPS, CircuitCXFid, CircuitCXMultiFid, Gates, Load
+from qtensor import Info, State, MPS, CircuitCXFid, CircuitCXMultiFid, Gates, Loader
 import time
 
 N = 20
@@ -21,7 +21,7 @@ circuit.evolution(mps, N, D, fid_result_two, max_rank=max_rank, ort=False)
 print(fid_result_two)
 print(len(fid_result_two))
 
-load = Load('../Results.xlsx')
+load = Loader('../Results.xlsx')
 sheet_name = 'Multi_qubit_fidelity_ort'
 load.write_data(sheet_name, 'K', 1, D, fid_result_two)
 
@@ -37,7 +37,7 @@ circuit.evolution(mps, mps_exact, N, D, fid_result_multi, max_rank=max_rank, ort
 print(fid_result_multi)
 print(len(fid_result_multi))
 
-load = Load('../Results.xlsx')
+load = Loader('../Results.xlsx')
 sheet_name = 'Multi_qubit_fidelity_ort'
 load.write_data(sheet_name, 'L', 1, D, fid_result_multi)
 

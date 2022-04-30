@@ -157,7 +157,7 @@ class MitigationAllOneLayerCircuitCX(MitigationBaseCircuitCX):
             self.evolution_mitigation(state, N, params_opt[0:(4 * N)])
 
             self.evolution_one_qubits_layer(state_check, N, params_fix[0:(4 * N)])
-            self.evolution_two_qubits_layer(state_check, parity, N, max_rank, ort=False)
+            self.evolution_two_qubits_layer(state_check, parity, N, max_rank, ort)
 
             self.evolution_one_qubits_layer(state_exact, N, params_fix[0:(4 * N)])
             self.evolution_two_qubits_layer(state_exact, parity, N, max_rank=None, ort=False)

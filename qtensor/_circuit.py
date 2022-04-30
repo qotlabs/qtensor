@@ -253,3 +253,53 @@ class CircuitCZMultiFid(object):
                     state_exact.two_qubit_gate(self.gates.CZ(), i)
                 fid_result.append(state.fidelity(state_exact))
                 parity = False
+
+
+class CircuitCXFix(object):
+    def __init__(self, gates):
+        self.gates = gates
+
+    def evolution(self, params_fix, state, N, D, max_rank=None, ort=False):
+        iters = 0
+        parity = False
+        for d in range(D):
+            for i in range(N):
+                alpha = params_fix[iters]
+                phi = params_fix[iters + 1]
+                theta = params_fix[iters + 2]
+                iters += 3
+                Rn = self.gates.Rn(alpha, phi, theta)
+                state.one_qubit_gate(Rn, i)
+            if not parity:
+                for i in range(0, N - 1, 2):
+                    state.two_qubit_gate(self.gates.CX(), i, max_rank, ort)
+                parity = True
+            else:
+                for i in range(1, N - 1, 2):
+                    state.two_qubit_gate(self.gates.CX(), i, max_rank, ort)
+                parity = False
+
+
+class CircuitCZFix(object):
+    def __init__(self, gates):
+        self.gates = gates
+
+    def evolution(self, params_fix, state, N, D, max_rank=None, ort=False):
+        iters = 0
+        parity = False
+        for d in range(D):
+            for i in range(N):
+                alpha = params_fix[iters]
+                phi = params_fix[iters + 1]
+                theta = params_fix[iters + 2]
+                iters += 3
+                Rn = self.gates.Rn(alpha, phi, theta)
+                state.one_qubit_gate(Rn, i)
+            if not parity:
+                for i in range(0, N - 1, 2):
+                    state.two_qubit_gate(self.gates.CZ(), i, max_rank, ort)
+                parity = True
+            else:
+                for i in range(1, N - 1, 2):
+                    state.two_qubit_gate(self.gates.CZ(), i, max_rank, ort)
+                parity = False

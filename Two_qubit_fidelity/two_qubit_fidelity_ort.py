@@ -1,4 +1,4 @@
-from qtensor import Info, State, MPS, CircuitCZFid, Gates, Load
+from qtensor import Info, State, MPS, CircuitCZFid, Gates, Loader
 import time
 
 N = 60
@@ -21,7 +21,7 @@ circuit.evolution(mps, N, D, fid_result, max_rank=max_rank, ort=False)
 print(fid_result)
 print(len(fid_result))
 
-load = Load('../Results.xlsx')
+load = Loader('../Results.xlsx')
 sheet_name = 'Two_qubit_fidelity_ort'
 load.write_data(sheet_name, 'D', 1, D, fid_result)
 
