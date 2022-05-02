@@ -165,7 +165,9 @@ class MitigationAllOneLayerCircuitCX(MitigationBaseCircuitCX):
                 parity = True
             else:
                 parity = False
-        return state_check.fidelity(state_exact), state.fidelity(state_exact)
+        fid_start_list = np.array(fid_start_list)
+        fid_finish_list = np.array(fid_finish_list)
+        return state_check.fidelity(state_exact), state.fidelity(state_exact), fid_start_list, fid_finish_list
 
     # Use copy.deepcopy() with transfer state and state_check!
     def infidelity(self, parameters_opt, parameters_fix, state, state_check, N, p, max_rank, ort):
@@ -232,7 +234,9 @@ class MitigationAllTwoLayerCircuitCX(MitigationBaseCircuitCX):
             self.evolution_two_qubits_layer(state_exact, False, N, max_rank=None, ort=False)
             self.evolution_one_qubits_layer(state_exact, N, params_fix[(4 * N):(8 * N)])
             self.evolution_two_qubits_layer(state_exact, True, N, max_rank=None, ort=False)
-        return state_check.fidelity(state_exact), state.fidelity(state_exact)
+        fid_start_list = np.array(fid_start_list)
+        fid_finish_list = np.array(fid_finish_list)
+        return state_check.fidelity(state_exact), state.fidelity(state_exact), fid_start_list, fid_finish_list
 
     # Use copy.deepcopy() with transfer state and state_check!
     def infidelity(self, parameters_opt, parameters_fix, state, state_check, N, max_rank, ort):

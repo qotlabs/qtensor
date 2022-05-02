@@ -14,3 +14,4 @@ from qtensor._vqe_optimizer import VQEOptimizer
 from qtensor._fidelity import fidelity, purity
 from qtensor._mitigation_circuit import MitigationStartCircuitCX, MitigationFinishCircuitCX, \
     MitigationAllOneLayerCircuitCX, MitigationAllTwoLayerCircuitCX, MitigationFullCircuitCX, MitigationWithoutCircuitCX
+from qtensor._circuit import CircuitCXFix, CircuitCZFix

@@ -99,29 +99,41 @@ fid_start_results = []
 fid_finish_results = []
 fid_start_ort_results = []
 fid_finish_ort_results = []
-fid_results = []
-fid_ort_results = []
+fid_start_results_layer = []
+fid_finish_results_layer = []
+fid_start_ort_results_layer = []
+fid_finish_ort_results_layer = []
 
 for k in tqdm(range(nums_of_samples)):
     params_fix = params_fix_matrix[k]
 
     state = MPS(info)
     state.all_zeros_state(N)
-    fid_start, fid_finish = mitigation_circuit.evolution(state, params_fix, N, D, max_rank=2, ort=False)
+    fid_start, fid_finish, fid_start_layer, fid_finish_layer = \
+        mitigation_circuit.evolution(state, params_fix, N, D, max_rank=2, ort=False)
 
     state = MPS(info)
     state.all_zeros_state(N)
-    fid_start_ort, fid_finish_ort = mitigation_circuit.evolution(state, params_fix, N, D, max_rank=2, ort=True)
+    fid_start_ort, fid_finish_ort, fid_start_ort_layer, fid_finish_ort_layer = \
+        mitigation_circuit.evolution(state, params_fix, N, D, max_rank=2, ort=True)
 
     fid_start_results.append(fid_start)
     fid_finish_results.append(fid_finish)
     fid_start_ort_results.append(fid_start_ort)
     fid_finish_ort_results.append(fid_finish_ort)
+    fid_start_results_layer.extend(list(fid_start_layer))
+    fid_finish_results_layer.extend(list(fid_finish_layer))
+    fid_start_ort_results_layer.extend(list(fid_start_ort_layer))
+    fid_finish_ort_results_layer.extend(list(fid_finish_ort_layer))
 
 fid_start_results = np.array(fid_start_results)
 fid_finish_results = np.array(fid_finish_results)
 fid_start_ort_results = np.array(fid_start_ort_results)
 fid_finish_ort_results = np.array(fid_finish_ort_results)
+fid_start_results_layer = np.array(fid_start_results_layer)
+fid_finish_results_layer = np.array(fid_finish_results_layer)
+fid_start_ort_results_layer = np.array(fid_start_ort_results_layer)
+fid_finish_ort_results_layer = np.array(fid_finish_ort_results_layer)
 
 loader = Loader('Results.xlsx')
 sheet_name = 'AllOneLayer'
@@ -130,45 +142,71 @@ loader.write_data(sheet_name, 'B', 1, nums_of_samples, fid_finish_results)
 loader.write_data(sheet_name, 'C', 1, nums_of_samples, fid_start_ort_results)
 loader.write_data(sheet_name, 'D', 1, nums_of_samples, fid_finish_ort_results)
 
+loader = Loader('Results.xlsx')
+sheet_name = 'AllOneLayerMany'
+loader.write_data(sheet_name, 'A', 1, nums_of_samples * D, fid_start_results_layer)
+loader.write_data(sheet_name, 'B', 1, nums_of_samples * D, fid_finish_results_layer)
+loader.write_data(sheet_name, 'C', 1, nums_of_samples * D, fid_start_ort_results_layer)
+loader.write_data(sheet_name, 'D', 1, nums_of_samples * D, fid_finish_ort_results_layer)
 
-# mitigation_circuit = MitigationAllTwoLayerCircuitCX(info, gates, number_of_iterations)
-#
-# fid_start_results = []
-# fid_finish_results = []
-# fid_start_ort_results = []
-# fid_finish_ort_results = []
-# fid_results = []
-# fid_ort_results = []
-#
-# for k in tqdm(range(nums_of_samples)):
-#     params_fix = params_fix_matrix[k]
-#
-#     state = MPS(info)
-#     state.all_zeros_state(N)
-#     fid_start, fid_finish = mitigation_circuit.evolution(state, params_fix, N, D, max_rank=2, ort=False)
-#
-#     state = MPS(info)
-#     state.all_zeros_state(N)
-#     fid_start_ort, fid_finish_ort = mitigation_circuit.evolution(state, params_fix, N, D, max_rank=2, ort=True)
-#
-#     fid_start_results.append(fid_start)
-#     fid_finish_results.append(fid_finish)
-#     fid_start_ort_results.append(fid_start_ort)
-#     fid_finish_ort_results.append(fid_finish_ort)
-#
-# fid_start_results = np.array(fid_start_results)
-# fid_finish_results = np.array(fid_finish_results)
-# fid_start_ort_results = np.array(fid_start_ort_results)
-# fid_finish_ort_results = np.array(fid_finish_ort_results)
-#
-# loader = Loader('Results.xlsx')
-# sheet_name = 'AllTwoLayer'
-# loader.write_data(sheet_name, 'A', 1, nums_of_samples, fid_start_results)
-# loader.write_data(sheet_name, 'B', 1, nums_of_samples, fid_finish_results)
-# loader.write_data(sheet_name, 'C', 1, nums_of_samples, fid_start_ort_results)
-# loader.write_data(sheet_name, 'D', 1, nums_of_samples, fid_finish_ort_results)
-#
-#
+
+mitigation_circuit = MitigationAllTwoLayerCircuitCX(info, gates, number_of_iterations)
+
+fid_start_results = []
+fid_finish_results = []
+fid_start_ort_results = []
+fid_finish_ort_results = []
+fid_start_results_layer = []
+fid_finish_results_layer = []
+fid_start_ort_results_layer = []
+fid_finish_ort_results_layer = []
+
+for k in tqdm(range(nums_of_samples)):
+    params_fix = params_fix_matrix[k]
+
+    state = MPS(info)
+    state.all_zeros_state(N)
+    fid_start, fid_finish, fid_start_layer, fid_finish_layer = \
+        mitigation_circuit.evolution(state, params_fix, N, D, max_rank=2, ort=False)
+
+    state = MPS(info)
+    state.all_zeros_state(N)
+    fid_start_ort, fid_finish_ort, fid_start_ort_layer, fid_finish_ort_layer = \
+        mitigation_circuit.evolution(state, params_fix, N, D, max_rank=2, ort=True)
+
+    fid_start_results.append(fid_start)
+    fid_finish_results.append(fid_finish)
+    fid_start_ort_results.append(fid_start_ort)
+    fid_finish_ort_results.append(fid_finish_ort)
+    fid_start_results_layer.extend(list(fid_start_layer))
+    fid_finish_results_layer.extend(list(fid_finish_layer))
+    fid_start_ort_results_layer.extend(list(fid_start_ort_layer))
+    fid_finish_ort_results_layer.extend(list(fid_finish_ort_layer))
+
+fid_start_results = np.array(fid_start_results)
+fid_finish_results = np.array(fid_finish_results)
+fid_start_ort_results = np.array(fid_start_ort_results)
+fid_finish_ort_results = np.array(fid_finish_ort_results)
+fid_start_results_layer = np.array(fid_start_results_layer)
+fid_finish_results_layer = np.array(fid_finish_results_layer)
+fid_start_ort_results_layer = np.array(fid_start_ort_results_layer)
+fid_finish_ort_results_layer = np.array(fid_finish_ort_results_layer)
+
+loader = Loader('Results.xlsx')
+sheet_name = 'AllTwoLayer'
+loader.write_data(sheet_name, 'A', 1, nums_of_samples, fid_start_results)
+loader.write_data(sheet_name, 'B', 1, nums_of_samples, fid_finish_results)
+loader.write_data(sheet_name, 'C', 1, nums_of_samples, fid_start_ort_results)
+loader.write_data(sheet_name, 'D', 1, nums_of_samples, fid_finish_ort_results)
+
+loader = Loader('Results.xlsx')
+sheet_name = 'AllTwoLayerMany'
+loader.write_data(sheet_name, 'A', 1, nums_of_samples * (D // 2), fid_start_results_layer)
+loader.write_data(sheet_name, 'B', 1, nums_of_samples * (D // 2), fid_finish_results_layer)
+loader.write_data(sheet_name, 'C', 1, nums_of_samples * (D // 2), fid_start_ort_results_layer)
+loader.write_data(sheet_name, 'D', 1, nums_of_samples * (D // 2), fid_finish_ort_results_layer)
+
+
 # mitigation_circuit = MitigationFullCircuitCX(info, gates, number_of_iterations)
 #
 # fid_start_results = []
