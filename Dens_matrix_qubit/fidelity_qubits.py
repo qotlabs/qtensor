@@ -1,5 +1,6 @@
 import numpy as np
-from qtensor import Info, Gates, MPS, CircuitCXRanking, Loader, fidelity, purity
+from qtensor import Info, Gates, MPS, CircuitCXRanking, CircuitCXRankingFull, Loader, fidelity, purity
+from tqdm import tqdm
 
 N = 10
 D = 10
@@ -16,12 +17,12 @@ k = 1000
 
 fidelity_array = np.zeros((len(max_rank_list), N))
 
-for l in range(k):
+for l in tqdm(range(k)):
     gates_random = [gates.Rn_random() for _ in range(N * D)]
     list_rho = []
     for i, max_rank in enumerate(max_rank_list):
         mps.all_zeros_state(N)
-        circuit.evolution(gates_random, mps, N, D, max_rank, ort=False)
+        circuit.evolution(gates_random, mps, N, D, max_rank, ort=True)
         list_rho.append([mps.get_density_matrix(j) for j in range(N)])
     for i in range(len(max_rank_list)):
         for j in range(N):
