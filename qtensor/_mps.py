@@ -290,7 +290,7 @@ class MPSMax(MPS):
                 core_next = torch.einsum('ijklkn', core_next)
                 core_next = torch.transpose(core_next, 1, 2)
             core_finish = torch.tensordot(core_base, core_next, dims=([4], [0]))
-            F = core_finish[0, 0, :, :, :, 0, 0]
+            F = core_finish[0, 0, :, :, 0, :, 0]
         return F
-    #
+
     # def get_best_approximate(self, num_passages=100):
