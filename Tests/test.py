@@ -186,20 +186,26 @@ import copy
 import numpy as np
 from qtensor import IsingHam
 from qtensor import Info, MPS, Gates, CircuitCZ
-from qtensor import Load
+# from qtensor import Load
 import matplotlib.pyplot as plt
 import time
 
-N = 20
-D = 13
+# N = 20
+# D = 13
+#
+# info = Info()
+# mps = MPS(info)
+# mps.all_zeros_state(N)
+#
+# gates = Gates(info)
+# circuit = CircuitCZ(gates)
+#
+# fid_result = []
+#
+# circuit.evolution([mps], N, D, max_rank=None, ort=False)
 
-info = Info()
-mps = MPS(info)
-mps.all_zeros_state(N)
-
-gates = Gates(info)
-circuit = CircuitCZ(gates)
-
-fid_result = []
-
-circuit.evolution([mps], N, D, max_rank=None, ort=False)
+k = 100
+real_part = []
+imag_part = []
+randn_vec = np.sqrt(2) * torch.randn(10000, dtype=torch.complex128, device="cpu")
+print(np.real(np.array(randn_vec)).std() ** 2, np.imag(np.array(randn_vec)).std() ** 2)
