@@ -33,3 +33,5 @@ print(torch.tensordot(state.get_tensor_F(2), torch.conj(state.mps_trunc.tt_cores
 print(torch.tensordot(state.get_tensor_F(3), torch.conj(state.mps_trunc.tt_cores[3]), dims=([0, 1, 2], [0, 1, 2])))
 print(torch.tensordot(state.get_tensor_F(4), torch.conj(state.mps_trunc.tt_cores[4]), dims=([0, 1, 2], [0, 1, 2])))
 print(torch.tensordot(state.return_full_vector(), torch.conj(state.mps_trunc.return_full_vector()), dims=([0], [0])))
+
+state.get_best_approximate()

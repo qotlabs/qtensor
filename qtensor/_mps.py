@@ -1,5 +1,6 @@
 import numpy as np
 import torch
+import copy
 
 
 class MPS(object):
@@ -243,7 +244,7 @@ class MPSMax(MPS):
         self.tt_decomposition(random_state_tensor)
         self.mps_trunc = MPSMax(self.info)
         self.mps_trunc.tt_decomposition(random_state_tensor, max_rank=max_rank)
-        # self.mps_trunc.normalization(0)
+        self.mps_trunc.normalization(0)
 
     def sequence_qr_calc_norm(self, n):
         if n == 0:
@@ -293,4 +294,16 @@ class MPSMax(MPS):
             F = core_finish[0, 0, :, :, 0, :, 0]
         return F
 
-    # def get_best_approximate(self, num_passages=100):
+    def get_fidelity(self):
+        return self.fidelity(self.mps_trunc)
+
+    def get_best_approximate(self, num_passages=100):
+        print('0 iterations: fidelity = {}'.format(self.fidelity(self.mps_trunc)))
+        for i in range(num_passages):
+            for n in range(0, self.N, 1):
+                self.mps_trunc.sequence_qr_calc_norm(n)
+                F = self.get_tensor_F(n)
+                f = torch.tensordot(F, torch.conj(F), dims=([0, 1, 2], [0, 1, 2]))
+                self.mps_trunc.tt_cores[n] = copy.deepcopy(F / torch.sqrt(f))
+                print(n, end=' ')
+            print('{} iterations: fidelity = {}'.format(i + 1, self.fidelity(self.mps_trunc)))
