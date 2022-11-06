@@ -2,8 +2,6 @@ import numpy as np
 import torch
 import copy
 
-//git test
-
 class MPS(object):
     def __init__(self, info):
         self.tt_cores = []
@@ -18,6 +16,17 @@ class MPS(object):
         self.phys_ind = []
         for i in range(n):
             self.tt_cores.append(torch.reshape(torch.tensor([1, 0], dtype=self.info.data_type, device=self.info.device),
+                                               (1, 2, 1)))
+            self.r.append(1)
+            self.phys_ind.append(2)
+        self.N = n
+        
+    def all_ones_state(self, n):
+        self.tt_cores = []
+        self.r = [1]
+        self.phys_ind = []
+        for i in range(n):
+            self.tt_cores.append(torch.reshape(torch.tensor([1, 1], dtype=self.info.data_type, device=self.info.device),
                                                (1, 2, 1)))
             self.r.append(1)
             self.phys_ind.append(2)
@@ -174,6 +183,11 @@ class MPS(object):
                 core_prev = torch.transpose(core_prev, 1, 2)
             scalar_product = core_prev[0][0][0][0]
             return scalar_product
+    
+    def get_sum(self):
+        all_ones = MPS(self.info)
+        all_ones.all_ones_state(self.N)
+        return self.scalar_product(all_ones)
 
     def get_element(self, list_of_index):
         matrix_list = [self.tt_cores[i][:, index, :] for i, index in enumerate(list_of_index)]
