@@ -169,7 +169,7 @@ class MPO(MPS):
         matrix_list = []
         for i in range(self.N):
             core1 = self.tt_cores[i]
-            core2 = self.tt_cores[i]
+            core2 = B.tt_cores[i]
             kernel = torch.einsum('aijb,cjid->acbd', core1, core2)
             matrix_list.append(torch.reshape(kernel, (self.r[i] * B.r[i], self.r[i + 1] * B.r[i + 1])))
         element = matrix_list[0]
