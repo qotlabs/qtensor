@@ -1,12 +1,28 @@
 import torch
 from qtensor import MPS
 
+from copy import deepcopy
+import numpy as np
 
 class MPO(MPS):
     def __init__(self, info):
         super().__init__(info)
         self.phys_ind_i = []
         self.phys_ind_j = []
+
+    def all_zeros_state(self, n):
+        self.tt_cores = []
+        self.r = [1]
+        self.phys_ind = []
+        self.phys_ind_i = []
+        self.phys_ind_j = []
+        for i in range(n):
+            self.tt_cores.append(torch.reshape(torch.tensor([[1, 0], [0, 0]], dtype=self.info.data_type, device=self.info.device), (1, 2, 2, 1)))
+            self.r.append(1)
+            self.phys_ind.append(4)
+            self.phys_ind_i.append(2)
+            self.phys_ind_j.append(2)
+        self.N = n
 
     def mpo_to_mps(self):
         self.phys_ind = []
@@ -112,3 +128,168 @@ class MPO(MPS):
             full_tensor = torch.transpose(full_tensor, 2 * i + 1, i + 2 * self.N)
         full_tensor = torch.reshape(full_tensor, tuple(self.phys_ind_i + self.phys_ind_j))
         return full_tensor
+        
+    def get_element(self, list_of_index_1, list_of_index_2):
+        matrix_list = [self.tt_cores[i][:, index1, index2, :] for i, (index1, index2) in enumerate(zip(list_of_index_1, list_of_index_2))]
+        element = matrix_list[0]
+        for matrix in matrix_list[1:]:
+            element = torch.tensordot(element, matrix, dims=([1], [0]))
+        return element[0][0]
+    
+    def pure_state(self, mps: MPS):
+        """
+        If given MPS is phi, makes MPO equal to |phi><phi|.
+        """
+        self.N = mps.N
+        
+        self.r = []
+        for i in range(self.N + 1):
+            self.r.append(mps.r[i] * mps.r[i])
+        
+        self.phys_ind = []
+        self.phys_ind_i = []
+        self.phys_ind_j = []
+        for i in range(self.N):
+            self.phys_ind.append(mps.phys_ind[i] * mps.phys_ind[i])
+            self.phys_ind_i.append(mps.phys_ind[i])
+            self.phys_ind_j.append(mps.phys_ind[i])
+        
+        self.tt_cores = []
+        for i in range(self.N):
+            core1 = torch.conj(mps.tt_cores[i])
+            core2 = mps.tt_cores[i]
+            self.tt_cores.append(torch.reshape(torch.kron(core1, core2),
+                                               (self.r[i], self.phys_ind_i[i], self.phys_ind_j[i], self.r[i + 1])))
+
+    def get_product_trace(self, B):
+        """
+        Trace of product self * B
+        """
+        assert self.N == B.N
+        matrix_list = []
+        for i in range(self.N):
+            core1 = self.tt_cores[i]
+            core2 = self.tt_cores[i]
+            kernel = torch.einsum('aijb,cjid->acbd', core1, core2)
+            matrix_list.append(torch.reshape(kernel, (self.r[i] * B.r[i], self.r[i + 1] * B.r[i + 1])))
+        element = matrix_list[0]
+        for matrix in matrix_list[1:]:
+            element = torch.tensordot(element, matrix, dims=([1], [0]))
+        return element[0][0]
+
+    def random_full(self, N: int, R: int):
+        """
+        Make kernels with random values, ranks equal to R
+        """
+        
+        self.N = N
+        
+        self.r = [1]
+        for i in range(N - 1):
+            self.r.append(R)
+        self.r.append(1)
+        self.phys_ind_i = [2 for i in range(N)]
+        self.phys_ind_j = [2 for i in range(N)]
+        
+        self.tt_cores = []
+        for i in range(self.N):
+            self.tt_cores.append(2 * torch.rand((self.r[i], self.phys_ind_i[i], self.phys_ind_j[i], self.r[i + 1]),
+                                 dtype=self.info.data_type, device=self.info.device) - 1)
+
+    def transpose(self):
+        mpo = MPO(self.info)
+        
+        mpo.N = self.N
+        
+        mpo.r = deepcopy(self.r)
+        mpo.phys_ind_i = deepcopy(self.phys_ind_j)
+        mpo.phys_ind_j = deepcopy(self.phys_ind_i)
+        
+        mpo.tt_cores = deepcopy(self.tt_cores)
+        for i in range(mpo.N):
+            mpo.tt_cores[i] = torch.transpose(mpo.tt_cores[i], 1, 2)
+            
+        return mpo
+    
+    def star(self):
+        """
+        transpose + conj
+        """
+        mpo = self.transpose()
+        for i in range(mpo.N):
+            mpo.tt_cores[i] = torch.conj(mpo.tt_cores[i])
+        return mpo
+    
+    def get_product(self, B):
+        """
+        return MPO: result of product self * B
+        """
+        assert self.phys_ind_j == B.phys_ind_i
+        
+        result = MPO(self.info)
+        
+        result.N = self.N
+        result.phys_ind_i = self.phys_ind_i
+        result.phys_ind_j = B.phys_ind_j
+        
+        result.r = [self.phys_ind_j[0]]
+        for i in range(self.N - 1):
+            result.r.append(self.r[i + 1] * B.r[i + 1] * self.phys_ind_j[i] * self.phys_ind_j[i + 1])
+        result.r.append(self.phys_ind_j[-1])
+        
+        result.tt_cores = []
+        
+        for i in range(self.N):
+            j_prev = 1
+            if i != 0:
+                j_prev = self.phys_ind_j[i - 1]
+            j_next = 1
+            if i + 1 < self.N:
+                j_next = self.phys_ind_j[i + 1]
+            
+            core1 = torch.unsqueeze(self.tt_cores[i], 0)
+            core1 = core1.expand(j_prev, core1.size(1), core1.size(2), core1.size(3), core1.size(4))
+            core2 = torch.unsqueeze(B.tt_cores[i], 0)
+            core2 = core2.expand(j_next, core2.size(1), core2.size(2), core2.size(3), core2.size(4))
+            
+            kernel = torch.einsum('abcde,fghij->bgadciejhf', core1, core2)
+            for x in range(self.phys_ind_j[i]):
+                for y in range(self.phys_ind_j[i]):
+                    if x != y:
+                        kernel[:, :, :, x, :, :, :, :, y, :] = 0
+            result.tt_cores.append(torch.reshape(kernel, (result.r[i], result.phys_ind_i[i], result.phys_ind_j[i], result.r[i + 1])))
+    
+        result.r[0] = 1
+        result.r[-1] = 1
+        result.tt_cores[0] = torch.sum(result.tt_cores[0], dim=0)[None, :, :, :]
+        result.tt_cores[-1] = torch.sum(result.tt_cores[-1], dim=3)[:, :, :, None]
+    
+        return result
+    
+    def get_full_matrix(self):
+        full_tensor = self.return_full_tensor()
+        n = 1
+        m = 1
+        sz = len(full_tensor.size()) // 2
+        for i in range(sz):
+            n *= full_tensor.size(i)
+            m *= full_tensor.size(i + sz)
+        return torch.reshape(full_tensor, (n, m))
+    
+    def random_rho(self, N: int, R: int):
+        """
+        Generate random N-quibit MPO with max rank R
+        """
+        L = MPO(self.info)
+        L.random_full(N, R)
+        mpo = L.get_product(L.star())
+        trace = torch.abs(mpo.get_trace()).item()
+        C = np.exp(np.log(trace) / mpo.N)
+        for i in range(mpo.N):
+            mpo.tt_cores[i] /= C
+        self.N = mpo.N
+        self.tt_cores = mpo.tt_cores
+        self.r = mpo.r
+        self.phys_ind = mpo.phys_ind
+        self.phys_ind_i = mpo.phys_ind_i
+        self.phys_ind_j = mpo.phys_ind_j

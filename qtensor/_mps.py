@@ -1,3 +1,6 @@
+from qtensor._gates import Gates
+from qtensor._circuit import CircuitCXFid
+
 import numpy as np
 import torch
 import copy
@@ -227,6 +230,14 @@ class MPS(object):
         core_finish = torch.tensordot(core_curr, core_next, dims=([3, 5], [0, 2]))
         density_matrix = core_finish[0, 0, :, :, 0, 0]
         return density_matrix
+    
+    def get_random_mps(self, n, D):
+        """
+        apply the evolution of depth D to |0>^n
+        """
+        self.all_zeros_state(n)
+        circut = CircuitCXFid(Gates(self.info))
+        circut.evolution(self, n, D, [])
 
 
 class MPSGrad(MPS):

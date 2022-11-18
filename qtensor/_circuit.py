@@ -151,7 +151,7 @@ class CircuitCXFid(object):
     def evolution(self, state, N, D, fid_result, max_rank=None, ort=False):
         parity = False
         for d in range(D):
-            print('d = ', d)
+            #print('d = ', d)
             for i in range(N):
                 Rn = self.gates.Rn_random()
                 state.one_qubit_gate(Rn, i)
@@ -163,9 +163,9 @@ class CircuitCXFid(object):
                     state_exact.two_qubit_gate(self.gates.CX(), i, ort=ort)
                     fid_result_point.append(state.fidelity(state_exact))
                 fid_result.append(np.exp(np.log(np.array(fid_result_point)).mean()))
-                print(fid_result[-1])
-                print(abs(1 - fid_result[-1]) < 10 ** (-5))
-                print(state.r)
+                #print(fid_result[-1])
+                #print(abs(1 - fid_result[-1]) < 10 ** (-5))
+                #print(state.r)
                 parity = True
             else:
                 fid_result_point = []
@@ -175,9 +175,9 @@ class CircuitCXFid(object):
                     state_exact.two_qubit_gate(self.gates.CX(), i, ort=ort)
                     fid_result_point.append(state.fidelity(state_exact))
                 fid_result.append(np.exp(np.log(np.array(fid_result_point)).mean()))
-                print(fid_result[-1])
-                print(abs(1 - fid_result[-1]) < 10 ** (-5))
-                print(state.r)
+                #print(fid_result[-1])
+                #print(abs(1 - fid_result[-1]) < 10 ** (-5))
+                #print(state.r)
                 parity = False
 
 
