@@ -1,5 +1,5 @@
 from qtensor._gates import Gates
-from qtensor._circuit import CircuitCXFid
+from qtensor._circuit import CircuitCX
 
 import numpy as np
 import torch
@@ -236,8 +236,8 @@ class MPS(object):
         apply the evolution of depth D to |0>^n
         """
         self.all_zeros_state(n)
-        circut = CircuitCXFid(Gates(self.info))
-        circut.evolution(self, n, D, [])
+        circut = CircuitCX(Gates(self.info))
+        circut.evolution([self], n, D)
 
 
 class MPSGrad(MPS):
