@@ -1,8 +1,8 @@
 import torch
+import numpy as np
+import copy
 from qtensor import MPS
 
-from copy import deepcopy
-import numpy as np
 
 class MPO(MPS):
     def __init__(self, info):
@@ -17,7 +17,8 @@ class MPO(MPS):
         self.phys_ind_i = []
         self.phys_ind_j = []
         for i in range(n):
-            self.tt_cores.append(torch.reshape(torch.tensor([[1, 0], [0, 0]], dtype=self.info.data_type, device=self.info.device), (1, 2, 2, 1)))
+            self.tt_cores.append(torch.reshape(torch.tensor([[1, 0], [0, 0]], dtype=self.info.data_type,
+                                                            device=self.info.device), (1, 2, 2, 1)))
             self.r.append(1)
             self.phys_ind.append(4)
             self.phys_ind_i.append(2)
@@ -37,6 +38,9 @@ class MPO(MPS):
                                                                 self.r[i + 1]))
 
     def gen_mpo_from_mps(self, mps: MPS):
+        """
+            If given MPS is psi, makes MPO equal to |psi><psi|
+        """
         self.N = mps.N
         self.r = []
         self.phys_ind_i = []
@@ -56,6 +60,103 @@ class MPO(MPS):
             self.phys_ind_i.append(mps.phys_ind[i])
             self.phys_ind_j.append(mps.phys_ind[i])
         self.r.append(mps.r[self.N] * mps.r[self.N])
+
+    def get_product_matrix(self, other):
+        """
+            return self * other
+        """
+        result = MPO(self.info)
+        result.N = self.N
+        result.tt_cores = []
+        for i in range(self.N):
+            mpo_core_curr = torch.tensordot(self.tt_cores[i], other.tt_cores[i], dims=([2], [1]))
+            mpo_core_curr = torch.transpose(mpo_core_curr, 1, 3)
+            mpo_core_curr = torch.transpose(mpo_core_curr, 2, 4)
+            mpo_core_curr = torch.transpose(mpo_core_curr, 2, 3)
+            mpo_core_curr = torch.reshape(mpo_core_curr, (self.r[i] * other.r[i], self.phys_ind_i[i],
+                                                          other.phys_ind_j[i], self.r[i + 1] * other.r[i + 1]))
+            result.tt_cores.append(mpo_core_curr)
+            result.r.append(self.r[i] * other.r[i])
+            result.phys_ind_i.append(self.phys_ind_i[i])
+            result.phys_ind_j.append(other.phys_ind_j[i])
+        result.r.append(self.r[self.N] * other.r[self.N])
+        return result
+
+    def get_trace_product_matrix(self, other):
+        """
+            return trace E * \rho, other = E, self = \rho Tr(other * this)
+        """
+        core_prev = torch.tensordot(other.tt_cores[0], self.tt_cores[0], dims=([2, 1], [1, 2]))
+        for i in range(1, len(other.tt_cores), 1):
+            core_prev = torch.tensordot(core_prev, other.tt_cores[i], dims=([1], [0]))
+            core_prev = torch.tensordot(core_prev, self.tt_cores[i], dims=([2, 4, 3], [0, 1, 2]))
+            core_prev = torch.transpose(core_prev, 1, 2)
+        trace = core_prev[0][0][0][0]
+        return trace.item()
+
+    def get_tensor_for_trace(self, other, n):
+        """
+            return partial trace E * \rho, other = E, self = \rho Tr(other * this)
+        """
+        if n == 0:
+            core_base = torch.tensordot(other.tt_cores[0], other.tt_cores[1], dims=([3], [0]))
+            core_base = torch.tensordot(core_base, self.tt_cores[1], dims=([4, 3], [1, 2]))
+            for i in range(2, self.N, 1):
+                core_base = torch.tensordot(core_base, self.tt_cores[i], dims=([5], [0]))
+                core_base = torch.tensordot(core_base, other.tt_cores[i], dims=([3, 5, 6], [0, 2, 1]))
+                core_base = torch.transpose(core_base, 3, 5)
+                core_base = torch.transpose(core_base, 4, 5)
+            F = core_base[:, :, :, 0, :, 0]
+            """          
+                         1     
+                        _|____________
+                   0---|              |  
+                F =    |_____         |  
+                        2|   |        |  
+                         3---|        | 
+                             |________| 
+            """
+
+        elif n == (self.N - 1):
+            core_base = torch.tensordot(other.tt_cores[0], self.tt_cores[0], dims=([2, 1], [1, 2]))
+            for i in range(1, self.N - 1, 1):
+                core_base = torch.tensordot(core_base, other.tt_cores[i], dims=([1], [0]))
+                core_base = torch.tensordot(core_base, self.tt_cores[i], dims=([2, 4, 3], [0, 1, 2]))
+                core_base = torch.transpose(core_base, 1, 2)
+            core_base = torch.tensordot(core_base, other.tt_cores[self.N - 1], dims=([1], [0]))
+            F = core_base[0, 0, :, :, :, :]
+            """          
+                                    1
+                         ___________|_
+                        |             |---3
+                        |        _____|  
+                F =     |       |   |2
+                        |       |---0
+                        |_______|
+            """
+        else:
+            core_base = torch.tensordot(other.tt_cores[0], self.tt_cores[0], dims=([2, 1], [1, 2]))
+            for i in range(1, n, 1):
+                core_base = torch.tensordot(core_base, other.tt_cores[i], dims=([1], [0]))
+                core_base = torch.tensordot(core_base, self.tt_cores[i], dims=([2, 4, 3], [0, 1, 2]))
+                core_base = torch.transpose(core_base, 1, 2)
+            core_base = torch.tensordot(core_base, other.tt_cores[n], dims=([1], [0]))
+            core_next = torch.tensordot(other.tt_cores[n + 1], self.tt_cores[n + 1], dims=([2, 1], [1, 2]))
+            for i in range(n + 2, self.N, 1):
+                core_next = torch.tensordot(core_next, other.tt_cores[i], dims=([1], [0]))
+                core_next = torch.tensordot(core_next, self.tt_cores[i], dims=([2, 4, 3], [0, 1, 2]))
+                core_next = torch.transpose(core_next, 1, 2)
+            core_finish = torch.tensordot(core_base, core_next, dims=([5], [0]))
+            F = core_finish[0, 0, :, :, :, 0, :, 0]
+            """     
+                               1
+                     ___________|____________
+                    |      ____________      |
+                F = |     |     |2     |     |
+                    |     |---0    3---|     |
+                    |_____|            |_____| 
+            """
+        return F
 
     def one_qubit_gate(self, u, n):
         core = self.tt_cores[n]
@@ -94,7 +195,7 @@ class MPO(MPS):
         element = matrix_list[0]
         for matrix in matrix_list[1:]:
             element = torch.tensordot(element, matrix, dims=([1], [0]))
-        return element[0][0]
+        return element[0][0].item()
 
     def normalization(self, n):
         self.tt_cores[n] = self.tt_cores[n] / self.get_trace()
@@ -129,19 +230,20 @@ class MPO(MPS):
         full_tensor = torch.reshape(full_tensor, tuple(self.phys_ind_i + self.phys_ind_j))
         return full_tensor
         
-    def get_element(self, list_of_index_1, list_of_index_2):
-        matrix_list = [self.tt_cores[i][:, index1, index2, :] for i, (index1, index2) in enumerate(zip(list_of_index_1, list_of_index_2))]
+    def get_element(self, list_of_index):
+        list_of_index_i = list_of_index[0:self.N]
+        list_of_index_j = list_of_index[self.N:]
+        matrix_list = [self.tt_cores[i][:, list_of_index_i[i], list_of_index_j[i], :] for i in range(self.N)]
         element = matrix_list[0]
         for matrix in matrix_list[1:]:
             element = torch.tensordot(element, matrix, dims=([1], [0]))
-        return element[0][0]
+        return element[0][0].item()
     
     def pure_state(self, mps: MPS):
         """
         If given MPS is phi, makes MPO equal to |phi><phi|.
         """
         self.N = mps.N
-        
         self.r = []
         for i in range(self.N + 1):
             self.r.append(mps.r[i] * mps.r[i])
@@ -198,22 +300,18 @@ class MPO(MPS):
 
     def transpose(self):
         mpo = MPO(self.info)
-        
         mpo.N = self.N
-        
-        mpo.r = deepcopy(self.r)
-        mpo.phys_ind_i = deepcopy(self.phys_ind_j)
-        mpo.phys_ind_j = deepcopy(self.phys_ind_i)
-        
-        mpo.tt_cores = deepcopy(self.tt_cores)
+        mpo.r = copy.deepcopy(self.r)
+        mpo.phys_ind_i = copy.deepcopy(self.phys_ind_j)
+        mpo.phys_ind_j = copy.deepcopy(self.phys_ind_i)
+        mpo.tt_cores = copy.deepcopy(self.tt_cores)
         for i in range(mpo.N):
             mpo.tt_cores[i] = torch.transpose(mpo.tt_cores[i], 1, 2)
-            
         return mpo
-    
+
     def star(self):
         """
-        transpose + conj
+            transpose + conj
         """
         mpo = self.transpose()
         for i in range(mpo.N):
@@ -265,20 +363,17 @@ class MPO(MPS):
         result.tt_cores[-1] = torch.sum(result.tt_cores[-1], dim=3)[:, :, :, None]
     
         return result
-    
+
     def get_full_matrix(self):
         full_tensor = self.return_full_tensor()
-        n = 1
-        m = 1
-        sz = len(full_tensor.size()) // 2
-        for i in range(sz):
-            n *= full_tensor.size(i)
-            m *= full_tensor.size(i + sz)
-        return torch.reshape(full_tensor, (n, m))
-    
+        n = len(full_tensor.size()) // 2
+        rows_num = np.prod(np.array(full_tensor.size())[0:n])
+        cols_num = np.prod(np.array(full_tensor.size())[n:])
+        return torch.reshape(full_tensor, (rows_num, cols_num))
+
     def random_rho(self, N: int, R: int):
         """
-        Generate random N-quibit MPO with max rank R
+        Generate random N-qubit MPO with max rank R
         """
         L = MPO(self.info)
         L.random_full(N, R)
