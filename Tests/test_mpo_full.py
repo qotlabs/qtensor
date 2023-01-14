@@ -119,3 +119,12 @@ tensor = torch.reshape(mpo.get_full_matrix(), [2] * 2 * N)
 mpo.tt_decomposition(tensor)
 print(mpo.r)
 print('Main test: ', np.sum(np.abs(np.array(matrix) - np.array(mpo.get_full_matrix()))) ** 2)
+
+print('9. Test gen_random_mpo')
+mpo = MPO(info)
+mpo.gen_random_mpo(N, 5)
+print(mpo.r)
+print('Main test: ', mpo.get_trace())
+print('Main test: ', np.linalg.eigvals(np.array(mpo.get_full_matrix())))
+print('Main test: ',
+      np.sum(np.abs(np.array(mpo.get_full_matrix()) - np.array(mpo.get_full_matrix()).T.conjugate()) ** 2))

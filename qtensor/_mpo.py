@@ -238,6 +238,49 @@ class MPO(MPS):
         for matrix in matrix_list[1:]:
             element = torch.tensordot(element, matrix, dims=([1], [0]))
         return element[0][0].item()
+
+    def gen_random_cores(self, N, max_rank):
+        """
+            Make kernels with random values, ranks equal to max_rank
+        """
+        self.N = N
+        self.r = []
+        self.r.append(1)
+        for i in range(1, N, 1):
+            self.r.append(max_rank)
+        self.r.append(1)
+        self.phys_ind_i = [2 for _ in range(N)]
+        self.phys_ind_j = [2 for _ in range(N)]
+        self.tt_cores = []
+        for i in range(self.N):
+            dims = [self.r[i], self.phys_ind_i[i], self.phys_ind_j[i], self.r[i + 1]]
+            core = torch.tensor(np.random.randn(*dims) + 1j * np.random.randn(*dims), dtype=self.info.data_type,
+                                device=self.info.device)
+            self.tt_cores.append(core)
+
+    def gen_random_mpo(self, N, max_rank):
+        """
+            Generate random N-qubit MPO with max rank equal to max_rank ** 2
+        """
+        L = MPO(self.info)
+        L.gen_random_cores(N, max_rank)
+        mpo = L.get_product_matrix(L.star())
+        trace = np.abs(mpo.get_trace())
+        C = np.exp(np.log(trace) / N)
+        for i in range(mpo.N):
+            mpo.tt_cores[i] /= C
+        self.N = mpo.N
+        self.tt_cores = mpo.tt_cores
+        self.r = mpo.r
+        self.phys_ind = mpo.phys_ind
+        self.phys_ind_i = mpo.phys_ind_i
+        self.phys_ind_j = mpo.phys_ind_j
+        # u = torch.tensor([[1, 0, 0, 0],
+        #                   [0, 1, 0, 0],
+        #                   [0, 0, 1, 0],
+        #                   [0, 0, 0, 1]], dtype=self.info.data_type, device=self.info.device)
+        # for i in range(0, N - 1, 1):
+        #     self.two_qubit_gate(u, i, max_rank=max_rank)
     
     def pure_state(self, mps: MPS):
         """
@@ -281,18 +324,15 @@ class MPO(MPS):
 
     def random_full(self, N: int, R: int):
         """
-        Make kernels with random values, ranks equal to R
+            Make kernels with random values, ranks equal to R
         """
-        
         self.N = N
-        
         self.r = [1]
         for i in range(N - 1):
             self.r.append(R)
         self.r.append(1)
-        self.phys_ind_i = [2 for i in range(N)]
-        self.phys_ind_j = [2 for i in range(N)]
-        
+        self.phys_ind_i = [2 for _ in range(N)]
+        self.phys_ind_j = [2 for _ in range(N)]
         self.tt_cores = []
         for i in range(self.N):
             self.tt_cores.append(2 * torch.rand((self.r[i], self.phys_ind_i[i], self.phys_ind_j[i], self.r[i + 1]),
@@ -320,7 +360,7 @@ class MPO(MPS):
     
     def get_product(self, B):
         """
-        return MPO: result of product self * B
+            return MPO: result of product self * B
         """
         assert self.phys_ind_j == B.phys_ind_i
         
@@ -355,7 +395,8 @@ class MPO(MPS):
                 for y in range(self.phys_ind_j[i]):
                     if x != y:
                         kernel[:, :, :, x, :, :, :, :, y, :] = 0
-            result.tt_cores.append(torch.reshape(kernel, (result.r[i], result.phys_ind_i[i], result.phys_ind_j[i], result.r[i + 1])))
+            result.tt_cores.append(torch.reshape(kernel, (result.r[i], result.phys_ind_i[i], result.phys_ind_j[i],
+                                                          result.r[i + 1])))
     
         result.r[0] = 1
         result.r[-1] = 1
@@ -373,7 +414,7 @@ class MPO(MPS):
 
     def random_rho(self, N: int, R: int):
         """
-        Generate random N-qubit MPO with max rank R
+            Generate random N-qubit MPO with max rank R
         """
         L = MPO(self.info)
         L.random_full(N, R)
