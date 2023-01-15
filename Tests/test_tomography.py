@@ -62,7 +62,7 @@ print()
 
 mini_batch = data_model.get_mini_batch(2)
 print(learn_model.func_loss(params, mini_batch, (2 ** N) ** 2))
-
+print(learn_model.get_params())
 print('Test gradient')
 print(len(learn_model.grad_func_loss(params, mini_batch, (2 ** N) ** 2)))
 print(learn_model.omega.r)

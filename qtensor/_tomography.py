@@ -1,5 +1,6 @@
 import torch
 import numpy as np
+from scipy.optimize import minimize
 import copy
 import random
 from qtensor import MPS, MPO, CircuitCXFix, Gates
@@ -189,3 +190,15 @@ class LearnModel(object):
             der = (func_new - func) / delta
             grad_loss.append(der)
         return np.array(grad_loss)
+
+    def optimize(self, data_model, mini_batch_size, num_of_iters, coeff):
+        x0 = self.get_params()
+        for iterations in range(num_of_iters):
+            mini_batch = data_model.get_mini_batch(mini_batch_size)
+            res = minimize(self.func_loss, x0, args=(mini_batch, coeff), method='BFGS',
+                           jac=self.grad_func_loss, options={'disp': False, 'maxiter': 1})
+            # res = minimize(self.func_loss, x0, args=(mini_batch, coeff), method='BFGS',
+            #                options={'disp': False, 'maxiter': 1})
+            x0 = res.x
+            self.set_params(x0)
+            print('Iterations: ', iterations, ' Infidelity: ', self.func_loss(x0, mini_batch, coeff))
